@@ -1,26 +1,203 @@
 @import "tailwindcss";
 
+/* DesignT Custom Design System */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand Colors */
+  --brand-black: #0a0a0a;
+  --brand-charcoal: #1a1a1a;
+  --brand-white: #fafafa;
+  --brand-cream: #f7f4f0;
+
+  /* Surface Colors */
+  --surface-default: #faf9f7;
+  --surface-raised: #ffffff;
+
+  /* Border Colors */
+  --border-default: #e8e4df;
+  --border-hover: #d4cfc7;
+
+  /* Text Colors */
+  --text-primary: #1a1a1a;
+  --text-secondary: #5c5c5c;
+  --text-tertiary: #8c8c8c;
+  --text-inverse: #fafafa;
+
+  /* Accent Colors */
+  --accent-success: #2d6a4f;
+  --accent-success-light: #d8f3dc;
+  --accent-error: #c9184a;
+  --accent-error-light: #ffd6e0;
+  --accent-warning: #cc8b00;
+  --accent-warning-light: #fff3cd;
+
+  /* T-Shirt Colors */
+  --tshirt-midnight-black: #1a1a1a;
+  --tshirt-pure-white: #fafafa;
+  --tshirt-silver-grey: #9ca3af;
+  --tshirt-warm-beige: #d4c4a8;
+  --tshirt-cream: #f5f0e6;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* Fonts */
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  /* Background */
+  --background: var(--surface-default);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Brand */
+  --color-brand-black: var(--brand-black);
+  --color-brand-charcoal: var(--brand-charcoal);
+  --color-brand-white: var(--brand-white);
+  --color-brand-cream: var(--brand-cream);
+
+  /* Surface */
+  --color-surface: var(--surface-default);
+  --color-surface-raised: var(--surface-raised);
+
+  /* Border */
+  --color-border: var(--border-default);
+  --color-border-hover: var(--border-hover);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+
+  /* Accent */
+  --color-accent-success: var(--accent-success);
+  --color-accent-success-light: var(--accent-success-light);
+  --color-accent-error: var(--accent-error);
+  --color-accent-error-light: var(--accent-error-light);
+
+  /* Fonts */
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-default: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Typography Utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Heading Styles */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+/* Selection Styles */
+::selection {
+  background-color: var(--brand-charcoal);
+  color: var(--brand-white);
+}
+
+/* Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--brand-charcoal);
+  outline-offset: 2px;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-default);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Subtle Background Texture */
+.texture-linen {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  opacity: 0.02;
+}
+
+/* Animation Utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Stagger Animation Delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
