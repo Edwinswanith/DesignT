@@ -83,10 +83,10 @@ export const useDesignStore = create<DesignState & DesignActions>()(
     }),
     {
       name: "designt-design-store",
+      // Only persist lightweight settings, NOT base64 images (which slow down hydration)
       partialize: (state) => ({
-        currentDesign: state.currentDesign,
-        designHistory: state.designHistory,
         aspectRatio: state.aspectRatio,
+        mode: state.mode,
       }),
     }
   )

@@ -26,7 +26,7 @@ An elegant, chat-based t-shirt design platform that leverages Google's Gemini AI
 
 | Category | Technology |
 |----------|------------|
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Styling | Tailwind CSS |
 | State Management | Zustand with persistence |
 | AI Generation | Google Gemini API |

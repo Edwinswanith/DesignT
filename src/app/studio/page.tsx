@@ -238,19 +238,42 @@ export default function StudioPage() {
               />
             ))}
 
-            {/* Loading State */}
+            {/* Loading State - Gemini-style */}
             {isGenerating && (
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--brand-cream)] flex items-center justify-center text-sm font-medium text-[var(--brand-charcoal)] border border-[var(--border-default)]">
-                  D
+              <div className="flex gap-3 animate-message-enter">
+                {/* AI Avatar */}
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-[var(--brand-cream)] to-[var(--surface-raised)] flex items-center justify-center text-[var(--brand-charcoal)] border border-[var(--border-default)] shadow-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
+                  </svg>
                 </div>
-                <div className="px-4 py-3 rounded-[16px] rounded-tl-[4px] bg-[var(--surface-default)] border border-[var(--border-default)]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-2 border-[var(--brand-charcoal)] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-sm text-[var(--text-secondary)]">
-                      {loadingMessage}
-                    </span>
+
+                {/* Loading Bubble */}
+                <div className="flex flex-col gap-2">
+                  <div className="px-5 py-4 rounded-[18px] rounded-tl-[6px] bg-[var(--surface-raised)] border border-[var(--border-default)] shadow-sm">
+                    {/* Bouncing Dots */}
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className="w-2 h-2 rounded-full bg-[var(--brand-charcoal)] animate-bounce-dot"
+                        style={{ animationDelay: "0ms" }}
+                      />
+                      <div
+                        className="w-2 h-2 rounded-full bg-[var(--brand-charcoal)] animate-bounce-dot"
+                        style={{ animationDelay: "160ms" }}
+                      />
+                      <div
+                        className="w-2 h-2 rounded-full bg-[var(--brand-charcoal)] animate-bounce-dot"
+                        style={{ animationDelay: "320ms" }}
+                      />
+                    </div>
                   </div>
+
+                  {/* Status Text */}
+                  <p className="text-sm text-[var(--text-tertiary)] font-serif italic pl-1 animate-thinking-pulse">
+                    {loadingMessage}
+                  </p>
                 </div>
               </div>
             )}

@@ -34,6 +34,22 @@ interface RequestBody {
   };
 }
 
+// Enhanced prompt templates for t-shirt design generation
+const TSHIRT_DESIGN_CONTEXT = `Create a professional t-shirt design illustration that is:
+- Suitable for DTF/screen printing on fabric
+- Clean edges with transparent or white background
+- Vibrant, print-friendly colors with high contrast
+- Bold, clear shapes and forms that print well at chest size
+- Modern graphic design aesthetic, vector-like quality`;
+
+const REFERENCE_IMAGE_CONTEXT = `Use the uploaded image as style and color inspiration.
+Extract the key visual elements, mood, and color palette.
+Transform these into an original, print-ready t-shirt design.`;
+
+const STYLE_SUFFIX = `Style: Professional graphic design, crisp illustration,
+solid print-friendly colors that work on both light and dark fabric.
+Output: High-quality design image suitable for t-shirt printing.`;
+
 export async function POST(request: NextRequest) {
   try {
     const body: RequestBody = await request.json();
@@ -43,17 +59,41 @@ export async function POST(request: NextRequest) {
 
     if (body.contents && body.contents.length > 0) {
       // Multi-turn conversation mode
-      // Keep the conversation as-is, just ensure the last user message is clear
+      // Enhance the last user message with t-shirt design context
       contents = body.contents.map((content, index) => {
         if (content.role === "user" && index === body.contents.length - 1) {
           const textParts = content.parts.filter(p => p.text);
           const imageParts = content.parts.filter(p => p.inlineData);
-          const userText = textParts.map(p => p.text).join(" ");
+          const userText = textParts.map(p => p.text).join(" ").trim();
 
-          // Enhance with t-shirt design context
-          const enhancedText = userText.toLowerCase().includes('t-shirt') || userText.toLowerCase().includes('design')
-            ? userText
-            : `Create a t-shirt design: ${userText}. Style: Clean illustration with vibrant colors, suitable for printing on fabric.`;
+          // Check if this is a follow-up modification request
+          const isFollowUp = body.contents.length > 1;
+          const hasReferenceImage = imageParts.length > 0;
+
+          let enhancedText: string;
+
+          if (isFollowUp) {
+            // Follow-up request - focus on modification while maintaining t-shirt context
+            enhancedText = `${userText}
+
+Remember: Keep the result as a print-ready t-shirt design with clean edges and vibrant colors.`;
+          } else if (hasReferenceImage) {
+            // First message with reference image
+            enhancedText = `${TSHIRT_DESIGN_CONTEXT}
+
+${REFERENCE_IMAGE_CONTEXT}
+
+Design request: ${userText}
+
+${STYLE_SUFFIX}`;
+          } else {
+            // First message, text only
+            enhancedText = `${TSHIRT_DESIGN_CONTEXT}
+
+Design request: ${userText}
+
+${STYLE_SUFFIX}`;
+          }
 
           return {
             role: content.role,
@@ -66,13 +106,28 @@ export async function POST(request: NextRequest) {
         return content;
       });
     } else if (body.prompt) {
-      // Simple single-turn mode
+      // Simple single-turn mode (legacy fallback)
       const parts: GeminiPart[] = [];
+      const hasReferenceImage = !!body.referenceImage?.data;
 
-      // Create a descriptive prompt (not just keywords)
-      const enhancedPrompt = `Create a t-shirt design illustration: ${body.prompt}.
-The design should have clean lines, vibrant colors, and be suitable for printing on fabric.
-Style: Professional graphic design with bold, eye-catching visuals.`;
+      // Build enhanced prompt with t-shirt design context
+      let enhancedPrompt: string;
+
+      if (hasReferenceImage) {
+        enhancedPrompt = `${TSHIRT_DESIGN_CONTEXT}
+
+${REFERENCE_IMAGE_CONTEXT}
+
+Design request: ${body.prompt}
+
+${STYLE_SUFFIX}`;
+      } else {
+        enhancedPrompt = `${TSHIRT_DESIGN_CONTEXT}
+
+Design request: ${body.prompt}
+
+${STYLE_SUFFIX}`;
+      }
 
       parts.push({ text: enhancedPrompt });
 
