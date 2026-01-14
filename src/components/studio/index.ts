@@ -12,3 +12,4 @@ export { PositionControls } from "./PositionControls";
 export { SizeGuideModal } from "./SizeGuideModal";
 export { ChatMessage } from "./ChatMessage";
 export { ChatInput } from "./ChatInput";
+export { StyleSelector } from "./StyleSelector";

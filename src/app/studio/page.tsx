@@ -9,6 +9,8 @@ import {
   ChatMessage,
   ChatInput,
   ColorSelector,
+  StyleSelector,
+  AspectRatioSelector,
 } from "@/components/studio";
 import { useConversationStore, MessagePart } from "@/stores/useConversationStore";
 import { useProductStore } from "@/stores/useProductStore";
@@ -34,11 +36,15 @@ export default function StudioPage() {
     isGenerating,
     error,
     selectedDesign,
+    aspectRatio,
+    imageStyle,
     addUserMessage,
     addModelMessage,
     setGenerating,
     setError,
     setSelectedDesign,
+    setAspectRatio,
+    setImageStyle,
     clearConversation,
     getGeminiHistory,
   } = useConversationStore();
@@ -82,7 +88,11 @@ export default function StudioPage() {
         const response = await fetch("/api/generate-design", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: history }),
+          body: JSON.stringify({
+            contents: history,
+            aspectRatio,
+            style: imageStyle !== "none" ? imageStyle : undefined,
+          }),
         });
 
         const data = await response.json();
@@ -120,7 +130,7 @@ export default function StudioPage() {
         setGenerating(false);
       }
     },
-    [addUserMessage, addModelMessage, setGenerating, setError, getGeminiHistory]
+    [addUserMessage, addModelMessage, setGenerating, setError, getGeminiHistory, aspectRatio, imageStyle]
   );
 
   // Handle selecting a design to use
@@ -321,8 +331,29 @@ export default function StudioPage() {
             </div>
           </div>
 
-          {/* Quick Color Switcher */}
-          <div className="bg-[var(--surface-raised)] rounded-[20px] p-4 border border-[var(--border-default)]">
+          {/* Design Options */}
+          <div className="bg-[var(--surface-raised)] rounded-[20px] p-4 border border-[var(--border-default)] space-y-4">
+            <StyleSelector value={imageStyle} onChange={setImageStyle} size="compact" />
+            <div className="space-y-2">
+              <label className="block text-xs font-medium text-[var(--text-secondary)]">
+                Aspect Ratio
+              </label>
+              <div className="flex gap-2">
+                {(["1:1", "16:9", "9:16"] as const).map((ratio) => (
+                  <button
+                    key={ratio}
+                    onClick={() => setAspectRatio(ratio)}
+                    className={`flex-1 px-3 py-1.5 text-xs rounded-full border transition-all duration-200 ${
+                      aspectRatio === ratio
+                        ? "border-[var(--brand-charcoal)] bg-[var(--brand-charcoal)] text-white"
+                        : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--brand-charcoal)]"
+                    }`}
+                  >
+                    {ratio}
+                  </button>
+                ))}
+              </div>
+            </div>
             <ColorSelector value={color} onChange={setColor} size="compact" />
           </div>
 

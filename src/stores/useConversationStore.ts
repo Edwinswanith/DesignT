@@ -1,6 +1,8 @@
 "use client";
 
 import { create } from "zustand";
+import { AspectRatioId } from "@/constants/prompts";
+import { ImageStyleId } from "@/constants/styles";
 
 // Types for conversation messages
 export interface MessagePart {
@@ -35,6 +37,8 @@ interface ConversationState {
   isGenerating: boolean;
   error: string | null;
   selectedDesign: string | null; // The design user wants to use for t-shirt
+  aspectRatio: AspectRatioId;
+  imageStyle: ImageStyleId;
 }
 
 interface ConversationActions {
@@ -43,6 +47,8 @@ interface ConversationActions {
   setGenerating: (isGenerating: boolean) => void;
   setError: (error: string | null) => void;
   setSelectedDesign: (design: string | null) => void;
+  setAspectRatio: (ratio: AspectRatioId) => void;
+  setImageStyle: (style: ImageStyleId) => void;
   clearConversation: () => void;
   getGeminiHistory: () => GeminiContent[];
 }
@@ -55,6 +61,8 @@ export const useConversationStore = create<ConversationState & ConversationActio
     isGenerating: false,
     error: null,
     selectedDesign: null,
+    aspectRatio: "1:1",
+    imageStyle: "none",
 
     addUserMessage: (text, images) => {
       const parts: MessagePart[] = [];
@@ -113,11 +121,17 @@ export const useConversationStore = create<ConversationState & ConversationActio
 
     setSelectedDesign: (selectedDesign) => set({ selectedDesign }),
 
+    setAspectRatio: (aspectRatio) => set({ aspectRatio }),
+
+    setImageStyle: (imageStyle) => set({ imageStyle }),
+
     clearConversation: () =>
       set({
         messages: [],
         error: null,
         selectedDesign: null,
+        aspectRatio: "1:1",
+        imageStyle: "none",
       }),
 
     // Convert conversation to Gemini API format
