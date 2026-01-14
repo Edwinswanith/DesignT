@@ -2,6 +2,14 @@
 
 An elegant, chat-based t-shirt design platform that leverages Google's Gemini AI for real-time image generation. Create unique, custom t-shirt designs through natural conversation.
 
+## Screenshots
+
+### Landing Page
+![Landing Page](docs/screenshots/landing.png)
+
+### Design Studio
+![Design Studio](docs/screenshots/studio.png)
+
 ## Features
 
 ### AI Design Generation
