@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { TShirtColorId } from "@/constants/colors";
@@ -29,6 +30,8 @@ export function TShirtPreview({
   className,
 }: TShirtPreviewProps) {
   const mockupImage = MOCKUP_IMAGES[color];
+  const clipId = useId();
+  const filterId = `fabric-warp-${useId()}`;
 
   const sizes = {
     sm: "max-w-[200px]",
@@ -44,6 +47,31 @@ export function TShirtPreview({
     <div className={cn("relative w-full mx-auto", sizes[size], className)}>
       {/* Realistic T-shirt mockup */}
       <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-50">
+        {/* Chest-shaped clip-path for design overlay (print area) */}
+        <svg aria-hidden className="absolute w-0 h-0" focusable="false">
+          <defs>
+            <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+              <rect x="0.02" y="0.02" width="0.96" height="0.96" rx="0.12" ry="0.12" />
+            </clipPath>
+            <filter id={filterId} x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence
+                type="turbulence"
+                baseFrequency="0.025 0.015"
+                numOctaves="4"
+                seed="5"
+                result="warpNoise"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="warpNoise"
+                scale="6"
+                xChannelSelector="R"
+                yChannelSelector="G"
+                result="warped"
+              />
+            </filter>
+          </defs>
+        </svg>
         <Image
           src={mockupImage}
           alt={`${color} t-shirt`}
@@ -56,10 +84,16 @@ export function TShirtPreview({
         {/* Design Overlay */}
         {designImage && (
           <div
-            className="absolute left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 ease-out"
+            className="absolute pointer-events-none transition-all duration-300 ease-out overflow-hidden"
             style={{
+              left: "50%",
               top: `${designTop}%`,
               width: `${designWidth}%`,
+              clipPath: `url(#${clipId})`,
+              transform: size === "sm"
+                ? "translateX(-50%)"
+                : "perspective(600px) rotateX(4deg) rotateY(0deg) translateX(-50%)",
+              transformOrigin: "center top",
             }}
           >
             <img
@@ -72,8 +106,19 @@ export function TShirtPreview({
               className="w-full h-auto object-contain"
               style={{
                 mixBlendMode: color === "midnight-black" ? "screen" : "multiply",
-                opacity: color === "midnight-black" ? 0.95 : 0.9,
-                filter: "contrast(1.05)",
+                opacity: color === "midnight-black" ? 0.95 : 0.88,
+                filter: `url(#${filterId}) saturate(0.95) contrast(1.08)`,
+              }}
+            />
+            {/* Fabric depth vignette — simulates the ink sitting in woven fabric */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(ellipse 80% 60% at 50% 40%, transparent 30%, rgba(0,0,0,0.12) 100%)",
+                mixBlendMode: "multiply",
+                pointerEvents: "none",
               }}
             />
           </div>
