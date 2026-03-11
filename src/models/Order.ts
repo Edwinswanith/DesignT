@@ -13,6 +13,7 @@ export interface IOrder extends Document {
   tshirtSize: string;
   quantity: number;
   designUrl: string;
+  backDesignUrl?: string;
   designPositionY: number;
   designScale: number;
   designAspectRatio: string;
@@ -44,6 +45,7 @@ const orderSchema = new Schema<IOrder>(
     tshirtSize: { type: String, required: true },
     quantity: { type: Number, required: true },
     designUrl: { type: String, required: true },
+    backDesignUrl: { type: String },
     designPositionY: { type: Number, required: true },
     designScale: { type: Number, required: true },
     designAspectRatio: { type: String, required: true },

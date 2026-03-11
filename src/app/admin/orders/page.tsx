@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { TSHIRT_COLORS } from "@/constants/colors";
 
 interface Order {
   _id: string;
@@ -17,6 +17,7 @@ interface Order {
   tshirtSize: string;
   quantity: number;
   designUrl: string;
+  backDesignUrl?: string;
   totalAmount: number;
   paymentMethod: string;
   paymentStatus: string;
@@ -25,14 +26,25 @@ interface Order {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  processing: "bg-purple-100 text-purple-800",
-  printing: "bg-indigo-100 text-indigo-800",
+  pending: "bg-slate-100 text-slate-800",
+  confirmed: "bg-sky-100 text-sky-800",
+  processing: "bg-cyan-100 text-cyan-800",
+  printing: "bg-teal-100 text-teal-800",
   shipped: "bg-cyan-100 text-cyan-800",
-  delivered: "bg-green-100 text-green-800",
+  delivered: "bg-emerald-100 text-emerald-800",
   cancelled: "bg-red-100 text-red-800",
 };
+
+function downloadDesign(dataUrl: string, orderNumber: string, side: "front" | "back") {
+  const mimeMatch = dataUrl.match(/^data:([^;]+);base64,/);
+  const ext = mimeMatch ? mimeMatch[1].split("/")[1] : "png";
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = `order-${orderNumber}-${side}.${ext}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -93,7 +105,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="pb-8 border-b border-[var(--border-default)]/30 space-y-3">
+      <div className="pb-8 border-b border-[var(--border-default)] space-y-3">
         <div className="flex items-baseline gap-3">
           <h1 className="text-5xl font-serif font-black text-[var(--text-primary)] tracking-tight">
             Orders
@@ -108,11 +120,11 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <div className="rounded-2xl border border-[var(--border-default)]/50 bg-[var(--surface-raised)]/80 backdrop-blur-sm overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-raised)] overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[var(--border-default)]/50 bg-[var(--surface-inset)]/50">
+              <tr className="border-b border-[var(--border-default)] bg-[var(--surface-inset)]">
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
                   Order
                 </th>
@@ -126,6 +138,9 @@ export default function AdminOrdersPage() {
                   Product
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
+                  Design
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
                   Amount
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
@@ -136,11 +151,11 @@ export default function AdminOrdersPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-default)]/30">
+            <tbody className="divide-y divide-[var(--border-default)]">
               {orders.map((order, idx) => (
                 <tr
                   key={order._id}
-                  className="hover:bg-[var(--surface-inset)]/40 transition-colors duration-200 group"
+                  className="hover:bg-[var(--surface-inset)] transition-colors duration-200 group"
                   style={{
                     animationDelay: `${idx * 25}ms`,
                   }}
@@ -173,6 +188,69 @@ export default function AdminOrdersPage() {
                     </div>
                   </td>
                   <td className="px-6 py-5">
+                    {(() => {
+                      const colorInfo = TSHIRT_COLORS[order.tshirtColor as keyof typeof TSHIRT_COLORS];
+                      const colorHex = colorInfo?.hex ?? "#9ca3af";
+                      const colorName = colorInfo?.name ?? order.tshirtColor;
+                      return (
+                        <div className="flex items-start gap-3">
+                          {/* Front design */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="relative">
+                              <img
+                                src={order.designUrl}
+                                alt="Front design"
+                                className="w-12 h-12 object-contain rounded-lg border border-[var(--border-default)] bg-[var(--surface-inset)]"
+                              />
+                              <span
+                                className="absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
+                                style={{ backgroundColor: colorHex }}
+                                title={colorName}
+                              />
+                            </div>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+                              Front
+                            </span>
+                            <button
+                              onClick={() => downloadDesign(order.designUrl, order.orderNumber, "front")}
+                              className="text-[10px] font-medium text-[var(--accent-primary)] hover:underline"
+                              title="Download front design"
+                            >
+                              Download
+                            </button>
+                          </div>
+                          {/* Back design (only if present) */}
+                          {order.backDesignUrl && (
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="relative">
+                                <img
+                                  src={order.backDesignUrl}
+                                  alt="Back design"
+                                  className="w-12 h-12 object-contain rounded-lg border border-[var(--border-default)] bg-[var(--surface-inset)]"
+                                />
+                                <span
+                                  className="absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
+                                  style={{ backgroundColor: colorHex }}
+                                  title={colorName}
+                                />
+                              </div>
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+                                Back
+                              </span>
+                              <button
+                                onClick={() => downloadDesign(order.backDesignUrl!, order.orderNumber, "back")}
+                                className="text-[10px] font-medium text-[var(--accent-primary)] hover:underline"
+                                title="Download back design"
+                              >
+                                Download
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-6 py-5">
                     <div className="text-lg font-bold text-[var(--text-primary)]">
                       ₹{order.totalAmount.toLocaleString()}
                     </div>
@@ -186,7 +264,7 @@ export default function AdminOrdersPage() {
                       onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                       disabled={updatingId === order._id}
                       className={`px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        STATUS_COLORS[order.status] || "bg-gray-100 text-gray-800"
+                        STATUS_COLORS[order.status] || "bg-slate-100 text-slate-800"
                       }`}
                     >
                       <option value="pending">Pending</option>

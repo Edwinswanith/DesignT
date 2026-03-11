@@ -67,6 +67,7 @@ export interface Order {
   tshirtSize: SizeId;
   quantity: number;
   designUrl: string;
+  backDesignUrl?: string;
   designPositionY: number;
   designScale: number;
   designAspectRatio: AspectRatioId;
@@ -109,6 +110,7 @@ export interface CreateOrderRequest {
   tshirtSize: SizeId;
   quantity: number;
   designUrl: string;
+  backDesignUrl?: string;
   designPositionY: number;
   designScale: number;
   designAspectRatio: AspectRatioId;

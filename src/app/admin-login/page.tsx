@@ -54,13 +54,10 @@ function AdminLoginContent() {
         className="relative w-full max-w-sm bg-[var(--surface-raised)] rounded-2xl border border-[var(--border-default)] p-8 animate-fade-in"
         style={{ boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03)" }}
       >
-        {/* Top edge highlight */}
-        <div className="absolute top-0 inset-x-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
-
         {/* Header */}
         <div className="text-center mb-8 animate-slide-up stagger-1">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-5 border border-blue-100">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#4f6df5" strokeWidth="1.5" className="w-5 h-5">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 flex items-center justify-center mx-auto mb-5 border border-sky-100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="1.5" className="w-5 h-5">
               <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
               <path d="M5 19l1 3 1-3 3-1-3-1-1-3-1 3-3 1 3 1z" />
             </svg>

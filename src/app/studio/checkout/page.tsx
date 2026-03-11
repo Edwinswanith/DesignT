@@ -59,6 +59,7 @@ export default function CheckoutPage() {
         tshirtSize: size,
         quantity,
         designUrl: activeDesign,
+        ...(backDesign ? { backDesignUrl: backDesign } : {}),
         designPositionY: designPosition.y,
         designScale: designPosition.scale,
         designAspectRatio: mode === "ai" ? "16x9" : "1x1",
@@ -93,7 +94,7 @@ export default function CheckoutPage() {
       console.error("Order error:", error);
       setIsProcessing(false);
     }
-  }, [router, name, phone, email, address, city, pincode, state, paymentMethod, color, size, quantity, activeDesign, designPosition, mode, pricing]);
+  }, [router, name, phone, email, address, city, pincode, state, paymentMethod, color, size, quantity, activeDesign, designPosition, mode, pricing, backDesign]);
 
   return (
     <StudioLayout currentStep={4}>

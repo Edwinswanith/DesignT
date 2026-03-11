@@ -116,16 +116,6 @@ src/
    # Google Gemini API
    GEMINI_API_KEY=your_gemini_api_key
 
-   # Supabase
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-   # Cloudinary
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
-
    # Razorpay
    NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key_id
    RAZORPAY_KEY_SECRET=your_razorpay_secret
