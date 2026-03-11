@@ -14,7 +14,7 @@ export function AspectRatioSelector({
 }: AspectRatioSelectorProps) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-[var(--text-primary)]">
+      <label className="block text-sm font-medium tracking-wide text-[var(--text-primary)]">
         Design Shape
       </label>
       <div className="flex gap-3">
@@ -27,7 +27,7 @@ export function AspectRatioSelector({
               className={cn(
                 "flex-1 p-4 rounded-[12px] border-2 transition-all duration-200",
                 isSelected
-                  ? "border-[var(--brand-charcoal)] bg-[var(--brand-charcoal)]/5"
+                  ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/5"
                   : "border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface-raised)]"
               )}
             >
@@ -37,7 +37,7 @@ export function AspectRatioSelector({
                   className={cn(
                     "border-2 rounded-sm",
                     isSelected
-                      ? "border-[var(--brand-charcoal)]"
+                      ? "border-[var(--accent-primary)]"
                       : "border-[var(--text-tertiary)]"
                   )}
                   style={{
@@ -50,7 +50,7 @@ export function AspectRatioSelector({
                 className={cn(
                   "text-sm font-semibold",
                   isSelected
-                    ? "text-[var(--text-primary)]"
+                    ? "text-[var(--accent-primary)]"
                     : "text-[var(--text-secondary)]"
                 )}
               >

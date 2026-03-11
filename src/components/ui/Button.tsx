@@ -24,7 +24,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const baseStyles = `
       inline-flex items-center justify-center
-      font-sans font-semibold tracking-wide
+      font-sans font-semibold tracking-[0.01em]
       transition-all duration-200 ease-out
       focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-default)]
       disabled:opacity-40 disabled:cursor-not-allowed
@@ -48,13 +48,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       `,
       ghost: `
         bg-transparent text-[var(--text-secondary)]
-        hover:text-[var(--text-primary)] hover:bg-[var(--surface-overlay)]
+        hover:text-[var(--text-primary)] hover:bg-[var(--surface-inset)]
         focus-visible:ring-[var(--border-default)]
       `,
       outline: `
         bg-transparent text-[var(--text-primary)]
         border border-[var(--border-default)]
-        hover:border-[var(--border-hover)] hover:bg-[var(--surface-overlay)]
+        hover:border-[var(--border-hover)] hover:bg-[var(--surface-inset)]
         focus-visible:ring-[var(--border-default)]
       `,
     };
@@ -62,7 +62,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const sizes = {
       sm: "h-8 px-3.5 text-xs rounded-lg gap-1.5",
       md: "h-10 px-5 text-sm rounded-xl gap-2",
-      lg: "h-12 px-7 text-base rounded-xl gap-2.5",
+      lg: "h-12 px-7 text-[0.9375rem] rounded-xl gap-2.5",
     };
 
     return (

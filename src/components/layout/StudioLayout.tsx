@@ -2,6 +2,8 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { signOut, useSession } from "next-auth/react";
 import { Container } from "./Container";
 
 const STUDIO_STEPS = [
@@ -52,6 +54,8 @@ function StepIcon({ icon, className }: { icon: string; className?: string }) {
 }
 
 export function StudioLayout({ children, currentStep }: StudioLayoutProps) {
+  const { data: session } = useSession();
+
   return (
     <div className="min-h-screen bg-[var(--surface-default)] relative texture-noise">
       {/* Studio Header */}
@@ -60,40 +64,42 @@ export function StudioLayout({ children, currentStep }: StudioLayoutProps) {
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-[var(--accent-primary)] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow duration-300">
-                <span className="text-sm font-bold text-white">D</span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="DesignT"
+                width={32}
+                height={32}
+                className="h-8 w-auto object-contain rounded-lg"
+                priority
+              />
               <span className="text-lg font-serif tracking-tight text-[var(--text-primary)]">
                 DesignT
               </span>
             </Link>
 
             {/* Progress Steps — Desktop */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-4">
               {STUDIO_STEPS.map((step, idx) => {
                 const isActive = step.id === currentStep;
                 const isCompleted = step.id < currentStep;
                 return (
                   <div key={step.id} className="flex items-center">
-                    <div
-                      className={`
-                        flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300
-                        ${isActive
-                          ? "bg-[var(--accent-primary-light)] text-[var(--accent-primary)] border border-[var(--border-accent)]"
-                          : isCompleted
-                          ? "text-[var(--accent-primary-muted)]"
-                          : "text-[var(--text-tertiary)]"
-                        }
-                      `}
-                    >
-                      <StepIcon
-                        icon={step.icon}
-                        className={`w-3.5 h-3.5 ${isActive ? "text-[var(--accent-primary)]" : isCompleted ? "text-[var(--accent-primary-muted)]" : ""}`}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          isActive ? "bg-[var(--accent-primary)]" : isCompleted ? "bg-[var(--accent-primary-muted)]" : "bg-[var(--border-default)]"
+                        }`}
                       />
-                      {step.label}
+                      <span
+                        className={`text-xs font-serif transition-colors duration-300 ${
+                          isActive ? "text-[var(--accent-primary)] font-semibold" : isCompleted ? "text-[var(--accent-primary-muted)]" : "text-[var(--text-tertiary)]"
+                        }`}
+                      >
+                        {step.id}. {step.label}
+                      </span>
                     </div>
                     {idx < STUDIO_STEPS.length - 1 && (
-                      <div className={`w-8 h-px mx-1 ${isCompleted ? "bg-[var(--accent-primary-muted)]" : "bg-[var(--border-default)]"}`} />
+                      <span className="text-[var(--border-hover)] text-xs mx-2">/</span>
                     )}
                   </div>
                 );
@@ -109,11 +115,27 @@ export function StudioLayout({ children, currentStep }: StudioLayoutProps) {
                 {STUDIO_STEPS[currentStep - 1]?.label}
               </span>
             </div>
+
+            {/* Logout Button */}
+            {session && (
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="hidden md:flex items-center gap-2 h-9 px-3 rounded-xl border border-[var(--border-default)] hover:border-[var(--border-hover)] hover:bg-[var(--surface-inset)] transition-all duration-200 group"
+                title={`Sign out (${session.user?.name})`}
+              >
+                <span className="text-sm font-medium text-[var(--text-primary)] max-w-[100px] truncate">
+                  {session.user?.name?.split(" ")[0]}
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors">
+                  <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            )}
           </div>
         </Container>
 
         {/* Mobile Progress Bar */}
-        <div className="md:hidden h-0.5 bg-[var(--border-default)]">
+        <div className="md:hidden h-[3px] bg-[var(--border-default)]">
           <div
             className="h-full bg-[var(--accent-primary)] transition-all duration-500 ease-out"
             style={{ width: `${(currentStep / STUDIO_STEPS.length) * 100}%` }}
@@ -122,7 +144,7 @@ export function StudioLayout({ children, currentStep }: StudioLayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="relative py-4 md:py-6">
+      <main className="relative py-5 md:py-8">
         <Container size="wide">{children}</Container>
       </main>
     </div>

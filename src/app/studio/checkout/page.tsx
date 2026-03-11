@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { StudioLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
 import { TShirtPreview, ShowBackButton } from "@/components/studio";
@@ -15,13 +16,16 @@ import { calculatePricing, formatPrice } from "@/constants/pricing";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isProcessing, setIsProcessing] = useState(false);
   const [side, setSide] = useState<"front" | "back">("front");
 
   const { mode, currentDesign, uploadedImage, backDesign } = useDesignStore();
   const { color, size, quantity, designPosition, backDesignPosition } = useProductStore();
-  const { name, phone, email, address, city, pincode, paymentMethod } =
+  const { name, phone, address, city, pincode, state, paymentMethod } =
     useCustomerStore();
+
+  const email = session?.user?.email || "";
 
   const activeDesign = mode === "ai" ? currentDesign : uploadedImage;
   const colorData = TSHIRT_COLORS[color];
@@ -42,12 +46,46 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      // For now, simulate order creation
-      // In production, this would call the API endpoints
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Prepare order data
+      const orderData = {
+        customerName: name,
+        customerPhone: phone,
+        customerEmail: email,
+        addressLine: address,
+        city,
+        pincode,
+        state,
+        tshirtColor: color,
+        tshirtSize: size,
+        quantity,
+        designUrl: activeDesign,
+        designPositionY: designPosition.y,
+        designScale: designPosition.scale,
+        designAspectRatio: mode === "ai" ? "16x9" : "1x1",
+        unitPrice: pricing.unitPrice,
+        subtotal: pricing.subtotal,
+        gstAmount: pricing.gst,
+        shippingAmount: pricing.shipping || 0,
+        codFee: pricing.codFee,
+        discountAmount: pricing.discount,
+        totalAmount: pricing.total,
+        paymentMethod,
+        paymentStatus: "pending",
+        status: "pending",
+      };
 
-      // Generate a mock order ID
-      const orderId = `TS${Date.now().toString().slice(-8)}`;
+      // Call the order API
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create order");
+      }
+
+      const { orderId } = await response.json();
 
       // Navigate to order confirmation
       router.push(`/order/${orderId}`);
@@ -55,7 +93,7 @@ export default function CheckoutPage() {
       console.error("Order error:", error);
       setIsProcessing(false);
     }
-  }, [router]);
+  }, [router, name, phone, email, address, city, pincode, state, paymentMethod, color, size, quantity, activeDesign, designPosition, mode, pricing]);
 
   return (
     <StudioLayout currentStep={4}>

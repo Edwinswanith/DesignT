@@ -45,9 +45,9 @@ export default function CustomizePage() {
 
   return (
     <StudioLayout currentStep={2}>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-        {/* Left Panel - Customization Options */}
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px_220px] gap-5 lg:gap-6">
+        {/* Left Panel - Customization Options (order-2 lg:order-1) */}
+        <div className="space-y-5 order-2 lg:order-1">
           <div className="p-5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-default)] relative">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.06)] to-transparent" />
             <ColorSelector value={color} onChange={setColor} />
@@ -74,10 +74,10 @@ export default function CustomizePage() {
           </div>
         </div>
 
-        {/* Right Panel - Preview */}
-        <div className="space-y-5">
-          <div className="bg-[var(--surface-raised)] rounded-2xl p-6 border border-[var(--border-default)] sticky top-20 relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.06)] to-transparent" />
+        {/* Center Panel - Preview (order-1 lg:order-2) */}
+        <div className="order-1 lg:order-2">
+          <div className="bg-[var(--surface-raised)] rounded-2xl p-6 border border-[var(--border-default)] relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
                 Preview
@@ -93,40 +93,44 @@ export default function CustomizePage() {
               size="lg"
               side={side}
             />
+          </div>
+        </div>
 
-            <div className="mt-5 pt-5 border-t border-[var(--border-default)]">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Color</span>
-                  <p className="font-semibold text-[var(--text-primary)] capitalize mt-0.5">
-                    {color.replace("-", " ")}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Size</span>
-                  <p className="font-semibold text-[var(--text-primary)] mt-0.5">
-                    {size}
-                  </p>
-                </div>
+        {/* Right Panel - Summary & Actions (order-3) */}
+        <div className="order-3">
+          <div className="bg-[var(--surface-raised)] rounded-2xl p-5 border border-[var(--border-default)] relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Summary</h3>
+            <div className="space-y-3 pb-4 border-b border-[var(--border-default)]">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Color</span>
+                <p className="font-semibold text-[var(--text-primary)] capitalize mt-0.5 text-sm">
+                  {color.replace("-", " ")}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Size</span>
+                <p className="font-semibold text-[var(--text-primary)] mt-0.5 text-sm">
+                  {size}
+                </p>
               </div>
             </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Button variant="outline" size="lg" onClick={handleBack} className="flex-1">
-              <svg className="mr-2 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="19" y1="12" x2="5" y2="12" />
-                <polyline points="12 19 5 12 12 5" />
-              </svg>
-              Back
-            </Button>
-            <Button size="lg" onClick={handleContinue} className="flex-1">
-              Continue
-              <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </Button>
+            <div className="pt-4 space-y-2">
+              <Button variant="outline" size="md" onClick={handleBack} className="w-full">
+                <svg className="mr-2 w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+                Back
+              </Button>
+              <Button size="md" onClick={handleContinue} className="w-full">
+                Continue
+                <svg className="ml-2 w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

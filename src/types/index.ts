@@ -124,3 +124,6 @@ export interface CreateOrderResponse {
   };
   error?: string;
 }
+
+// NextAuth Types
+export type UserRole = "user" | "admin";

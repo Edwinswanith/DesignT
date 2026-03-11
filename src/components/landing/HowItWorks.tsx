@@ -50,33 +50,38 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 md:py-32 bg-[var(--surface-raised)]">
+    <section id="how-it-works" className="py-20 md:py-32 bg-[var(--surface-default)]">
       <Container>
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-px bg-[var(--accent-primary)]" />
+            <span className="text-xs tracking-[0.2em] uppercase font-medium text-[var(--accent-primary)]">
+              How It Works
+            </span>
+          </div>
           <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-primary)] mb-4">
-            How It Works
+            Three Steps to Success
           </h2>
-          <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
-            From idea to delivery in three simple steps
+          <p className="text-lg text-[var(--text-secondary)] max-w-2xl">
+            From idea to delivery in just a few clicks
           </p>
         </div>
 
-        {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-          {STEPS.map((step, index) => (
+        {/* Steps Grid - Editorial Divider Layout */}
+        <div className="divide-y md:divide-y-0 md:divide-x divide-[var(--border-default)]">
+          {STEPS.map((step) => (
             <div
               key={step.number}
-              className="relative p-8 rounded-[20px] bg-[var(--surface-default)] border border-[var(--border-default)]
-                transition-all duration-300 hover:border-[var(--border-hover)] hover:shadow-[var(--shadow-medium)]"
+              className="px-0 md:px-10 py-10 md:py-0"
             >
               {/* Step Number */}
-              <span className="absolute -top-4 left-8 text-6xl font-serif text-[var(--border-default)]">
+              <span className="text-7xl leading-none font-serif text-[var(--border-default)] mb-4 block">
                 {step.number}
               </span>
 
               {/* Icon */}
-              <div className="mt-8 mb-6 text-[var(--text-primary)]">
+              <div className="mt-6 mb-6 text-[var(--accent-primary)]">
                 {step.icon}
               </div>
 
@@ -87,11 +92,6 @@ export function HowItWorks() {
               <p className="text-[var(--text-secondary)] leading-relaxed">
                 {step.description}
               </p>
-
-              {/* Connector Line (hidden on mobile, shown between steps on desktop) */}
-              {index < STEPS.length - 1 && (
-                <div className="hidden md:block absolute top-1/2 -right-6 w-12 h-0.5 bg-[var(--border-default)]" />
-              )}
             </div>
           ))}
         </div>

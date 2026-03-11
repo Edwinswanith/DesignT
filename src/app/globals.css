@@ -21,6 +21,7 @@
   --surface-overlay: #f8f9fb;
   --surface-glass: rgba(255, 255, 255, 0.82);
   --surface-inset: #edf0f5;
+  --surface-elevated: #ffffff;
 
   /* Border Colors */
   --border-default: #e2e6ed;
@@ -58,7 +59,7 @@
 
   /* Fonts */
   --font-serif: var(--font-instrument-serif), Georgia, serif;
-  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-sans: var(--font-plus-jakarta-sans), system-ui, sans-serif;
 
   /* Background */
   --background: var(--surface-default);
@@ -79,6 +80,7 @@
   --color-surface: var(--surface-default);
   --color-surface-raised: var(--surface-raised);
   --color-surface-inset: var(--surface-inset);
+  --color-surface-elevated: var(--surface-elevated);
 
   /* Border */
   --color-border: var(--border-default);

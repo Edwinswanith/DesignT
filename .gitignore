@@ -96,3 +96,8 @@ supabase/.temp
 # Uploaded files (if any local storage)
 /uploads
 /tmp
+
+# Deploy scripts (may contain secrets; do not commit)
+cloud_run.sh
+.env.cloudrun
+.env.*.cloudrun

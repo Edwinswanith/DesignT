@@ -25,6 +25,15 @@ const MOCKUP_IMAGES: Record<TShirtColorId, string> = {
   "cream": "/mockups/tshirt-cream.png",
 };
 
+// Map color IDs to backside mockup images
+const MOCKUP_IMAGES_BACK: Record<TShirtColorId, string> = {
+  "midnight-black": "/mockups/tshirt-black-backside.png",
+  "pure-white": "/mockups/tshirt-white-backside.png",
+  "silver-grey": "/mockups/tshirt-grey-backside.png",
+  "warm-beige": "/mockups/tshirt-beige-backside.png",
+  "cream": "/mockups/tshirt-cream-backside.png",
+};
+
 export function TShirtPreview({
   color,
   designImage,
@@ -35,7 +44,7 @@ export function TShirtPreview({
   side = "front",
   className,
 }: TShirtPreviewProps) {
-  const mockupImage = MOCKUP_IMAGES[color];
+  const mockupImage = side === "back" ? MOCKUP_IMAGES_BACK[color] : MOCKUP_IMAGES[color];
   const clipId = useId();
   const filterId = `fabric-warp-${useId()}`;
 
@@ -91,7 +100,6 @@ export function TShirtPreview({
           className="object-contain"
           sizes="(max-width: 768px) 200px, 400px"
           priority
-          style={{ transform: side === "back" ? "scaleX(-1)" : undefined }}
         />
 
         {/* Design Overlay */}
@@ -103,9 +111,7 @@ export function TShirtPreview({
               top: `${designTop}%`,
               width: `${designWidth}%`,
               clipPath: `url(#${clipId})`,
-              transform: size === "sm"
-                ? `translateX(-50%) rotate(${currentPosition.rotation || 0}deg)`
-                : `perspective(600px) rotateX(4deg) rotateY(0deg) translateX(-50%) rotate(${currentPosition.rotation || 0}deg)`,
+              transform: `translateX(-50%) rotate(${currentPosition.rotation || 0}deg)`,
               transformOrigin: "center center",
             }}
           >

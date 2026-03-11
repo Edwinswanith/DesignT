@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Manrope } from "next/font/google";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -47,7 +48,7 @@ export default function RootLayout({
       <body
         className={`${instrumentSerif.variable} ${manrope.variable} antialiased`}
       >
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

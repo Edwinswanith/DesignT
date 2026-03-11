@@ -5,9 +5,14 @@ import { Container } from "@/components/layout";
 
 export function CTASection() {
   return (
-    <section className="py-20 md:py-32 bg-[var(--brand-charcoal)]">
+    <section className="relative py-20 md:py-32 bg-[var(--accent-primary)] overflow-hidden">
+      {/* Decorative Background Letter */}
+      <span className="absolute text-[20rem] font-serif text-white/5 -top-20 -right-20 leading-none pointer-events-none">
+        D
+      </span>
+
       <Container>
-        <div className="text-center">
+        <div className="relative z-10 text-center">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[var(--text-inverse)] mb-6">
             Ready to Create?
           </h2>
@@ -19,8 +24,8 @@ export function CTASection() {
             <Link
               href="/studio"
               className="inline-flex items-center justify-center h-14 px-10 text-lg font-semibold
-                bg-[var(--surface-raised)] text-[var(--brand-charcoal)] rounded-[12px]
-                hover:bg-white transition-all duration-200 active:scale-[0.98]"
+                bg-[var(--brand-ink)] text-white rounded-xl
+                hover:bg-[var(--brand-sienna)] transition-all duration-200 active:scale-[0.98]"
             >
               Start Designing
               <svg

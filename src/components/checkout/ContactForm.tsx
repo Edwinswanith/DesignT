@@ -4,7 +4,7 @@ import { Input } from "@/components/ui";
 import { useCustomerStore } from "@/stores/useCustomerStore";
 
 export function ContactForm() {
-  const { name, phone, email, errors, setField } = useCustomerStore();
+  const { name, phone, errors, setField } = useCustomerStore();
 
   return (
     <div className="space-y-5">
@@ -34,15 +34,6 @@ export function ContactForm() {
         error={errors.phone}
         required
         type="tel"
-      />
-
-      <Input
-        label="Email Address"
-        value={email}
-        onChange={(e) => setField("email", e.target.value)}
-        placeholder="your.email@example.com (optional)"
-        error={errors.email}
-        type="email"
       />
     </div>
   );

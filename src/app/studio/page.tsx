@@ -186,17 +186,17 @@ export default function StudioPage() {
 
   return (
     <StudioLayout currentStep={1}>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 h-[calc(100vh-120px)] min-h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-[calc(100vh-120px)] min-h-[600px]">
 
         {/* ── Left Panel — Chat Interface ── */}
-        <div className="lg:col-span-7 flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] bg-[var(--surface-raised)] relative">
+        <div className="lg:col-span-6 flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] bg-[var(--surface-raised)] relative">
           {/* Subtle top edge highlight */}
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.06)] to-transparent" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
 
           {/* Chat Header */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)]">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-primary)]/5 flex items-center justify-center border border-[var(--border-accent)]">
+              <div className="w-8 h-8 rounded-lg bg-[var(--surface-inset)] flex items-center justify-center border border-[var(--border-default)]">
                 <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="1.5" className="w-4 h-4">
                   <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
                 </svg>
@@ -231,7 +231,7 @@ export default function StudioPage() {
               <div className="h-full flex flex-col items-center justify-center text-center px-4">
                 {/* Animated icon cluster */}
                 <div className="relative mb-8 animate-float">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/15 to-transparent flex items-center justify-center border border-[var(--border-accent)] shadow-[0_0_30px_rgba(79,109,245,0.06)]">
+                  <div className="w-16 h-16 rounded-2xl bg-[var(--surface-inset)] flex items-center justify-center border border-[var(--border-default)]">
                     <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="1.5" className="w-7 h-7">
                       <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
                       <path d="M5 19l1 3 1-3 3-1-3-1-1-3-1 3-3 1 3 1z" />
@@ -242,7 +242,7 @@ export default function StudioPage() {
                   <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]/25 animate-pulse" style={{ animationDelay: "1s" }} />
                 </div>
 
-                <h3 className="text-xl font-serif text-[var(--text-primary)] mb-2">
+                <h3 className="text-2xl font-serif text-[var(--text-primary)] mb-2">
                   What would you like to create?
                 </h3>
                 <p className="text-sm text-[var(--text-tertiary)] mb-8 max-w-sm leading-relaxed">
@@ -255,7 +255,7 @@ export default function StudioPage() {
                     <button
                       key={idx}
                       onClick={() => handleSuggestionClick(suggestion.text)}
-                      className="group flex items-center gap-2 px-3 py-2.5 text-xs text-left rounded-xl border border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--border-accent)] hover:text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/5 transition-all duration-200"
+                      className="group flex items-center gap-2 px-3 py-2.5 text-xs text-left rounded-xl border border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-primary)]/30 hover:text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/5 transition-all duration-200"
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <span className="flex-shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
@@ -342,12 +342,12 @@ export default function StudioPage() {
         </div>
 
         {/* ── Right Panel — Preview & Controls ── */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
+        <div className="lg:col-span-6 flex flex-col gap-4">
 
           {/* T-Shirt Preview Card */}
           <div className="flex-1 rounded-2xl p-5 border border-[var(--border-default)] bg-[var(--surface-raised)] flex flex-col relative overflow-hidden">
             {/* Subtle top edge highlight */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.06)] to-transparent" />
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
 
             {/* Ambient glow behind preview when design selected */}
             {selectedDesign && (
@@ -393,7 +393,7 @@ export default function StudioPage() {
 
           {/* Design Options Panel */}
           <div className="rounded-2xl p-4 border border-[var(--border-default)] bg-[var(--surface-raised)] space-y-4 relative">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.06)] to-transparent" />
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
 
             <StyleSelector value={imageStyle} onChange={setImageStyle} size="compact" />
 

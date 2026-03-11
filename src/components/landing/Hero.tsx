@@ -43,21 +43,24 @@ export function Hero() {
   const [activeDesign, setActiveDesign] = useState(0);
 
   return (
-    <section className="relative py-16 md:py-24 overflow-hidden">
-      {/* Subtle Background Texture */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--brand-cream)] to-[var(--surface-default)] opacity-50" />
+    <section className="relative py-20 md:py-32 overflow-hidden">
+      {/* Subtle Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[var(--surface-inset)] via-[var(--surface-default)] to-[var(--surface-default)] opacity-100" />
 
       <Container className="relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-[3fr_2fr] gap-16 lg:gap-20 items-center">
           {/* Left - Text Content */}
           <div className="text-center lg:text-left">
             {/* Eyebrow */}
-            <p className="text-sm font-semibold tracking-widest uppercase text-[var(--text-secondary)] mb-6 animate-fade-in">
-              AI-Powered Custom T-Shirts
-            </p>
+            <div className="flex items-center gap-3 mb-6 animate-fade-in">
+              <div className="w-8 h-px bg-[var(--accent-primary)]" />
+              <span className="text-xs tracking-[0.2em] uppercase font-medium text-[var(--accent-primary)]">
+                AI-Powered Custom T-Shirts
+              </span>
+            </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-[1.1] tracking-tight text-[var(--text-primary)] mb-6 animate-slide-up">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.1] text-[var(--text-primary)] mb-6 animate-slide-up">
               Turn Your Photos Into Wearable Art
             </h1>
 
@@ -68,15 +71,15 @@ export function Hero() {
             </p>
 
             {/* Feature Pills */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-8 animate-slide-up stagger-1">
-              {["Combine Multiple Photos", "Any Style", "16:9 / 9:16 / 1:1"].map((feature) => (
-                <span
-                  key={feature}
-                  className="px-4 py-1.5 text-sm bg-[var(--surface-raised)] border border-[var(--border-default)] rounded-full text-[var(--text-secondary)]"
-                >
-                  {feature}
-                </span>
-              ))}
+            <div className="mb-8 animate-slide-up stagger-1">
+              <p className="text-sm text-[var(--text-secondary)]">
+                {["Combine Multiple Photos", "Any Style", "16:9 / 9:16 / 1:1"].map((feature, i) => (
+                  <span key={feature}>
+                    {i > 0 && <span className="mx-3">·</span>}
+                    <span>{feature}</span>
+                  </span>
+                ))}
+              </p>
             </div>
 
             {/* CTA Button */}
@@ -84,9 +87,9 @@ export function Hero() {
               <Link
                 href="/studio"
                 className="inline-flex items-center justify-center h-14 px-10 text-lg font-semibold
-                  bg-[var(--brand-charcoal)] text-[var(--text-inverse)] rounded-[12px]
-                  hover:bg-[var(--brand-black)] transition-all duration-200
-                  active:scale-[0.98] shadow-[var(--shadow-medium)]"
+                  bg-[var(--accent-primary)] text-white rounded-xl
+                  hover:shadow-[var(--shadow-medium)] transition-all duration-200
+                  active:scale-[0.98]"
               >
                 Start Creating
                 <svg
@@ -107,13 +110,13 @@ export function Hero() {
             {/* Trust Badges */}
             <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-[var(--text-tertiary)] animate-fade-in stagger-3">
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
                 <span>Premium Quality</span>
               </div>
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2">
                   <rect x="1" y="3" width="15" height="13" />
                   <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
                   <circle cx="5.5" cy="18.5" r="2.5" />
@@ -124,41 +127,18 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Right - T-Shirt Showcase */}
-          <div className="relative animate-slide-up stagger-2">
-            {/* Main T-Shirt Display */}
-            <div className="relative max-w-[360px] mx-auto">
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
-                <Image
-                  src={SAMPLE_DESIGNS[activeDesign].image}
-                  alt={SAMPLE_DESIGNS[activeDesign].title}
-                  fill
-                  className="object-cover transition-opacity duration-300"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 360px"
-                />
-              </div>
-              {/* Label */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm px-5 py-2.5 rounded-full shadow-lg">
-                <p className="text-sm font-medium text-[var(--text-primary)]">
-                  {SAMPLE_DESIGNS[activeDesign].title}
-                </p>
-                <p className="text-xs text-[var(--text-tertiary)] text-center">
-                  {SAMPLE_DESIGNS[activeDesign].description}
-                </p>
-              </div>
-            </div>
-
-            {/* Thumbnail Navigation */}
-            <div className="flex justify-center gap-3 mt-6">
+          {/* Right - T-Shirt Showcase - Editorial Layout */}
+          <div className="relative animate-slide-up stagger-2 flex gap-4">
+            {/* Vertical Thumbnail Navigation */}
+            <div className="flex flex-col gap-2">
               {SAMPLE_DESIGNS.map((design, index) => (
                 <button
                   key={design.id}
                   onClick={() => setActiveDesign(index)}
-                  className={`w-14 h-[72px] rounded-lg border-2 transition-all duration-300 overflow-hidden ${
+                  className={`w-16 h-20 rounded-lg border-2 transition-all duration-300 overflow-hidden ${
                     activeDesign === index
-                      ? "border-[var(--brand-charcoal)] scale-110 shadow-lg"
-                      : "border-[var(--border-default)] opacity-60 hover:opacity-100 hover:scale-105"
+                      ? "border-[var(--accent-primary)] shadow-lg"
+                      : "border-[var(--border-default)] opacity-60 hover:opacity-100"
                   }`}
                 >
                   <div className="w-full h-full relative bg-gray-100">
@@ -167,21 +147,47 @@ export function Hero() {
                       alt={design.title}
                       fill
                       className="object-cover"
-                      sizes="56px"
+                      sizes="64px"
                     />
                   </div>
                 </button>
               ))}
             </div>
 
-            {/* Style badges */}
-            <div className="flex justify-center gap-2 mt-4">
-              <span className="text-xs text-[var(--text-tertiary)]">Styles: </span>
-              {["Realistic", "Animated", "Anime", "Artistic", "Vintage"].map((style) => (
-                <span key={style} className="text-xs text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded">
-                  {style}
-                </span>
-              ))}
+            {/* Main Display Column */}
+            <div className="flex-1 relative">
+              {/* Main T-Shirt Display */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-100" style={{ transform: "rotate(1.5deg)" }}>
+                <div className="relative aspect-[3/4]">
+                  <Image
+                    src={SAMPLE_DESIGNS[activeDesign].image}
+                    alt={SAMPLE_DESIGNS[activeDesign].title}
+                    fill
+                    className="object-cover transition-opacity duration-300"
+                    priority
+                    sizes="(max-width: 768px) 100vw, 300px"
+                  />
+                </div>
+              </div>
+
+              {/* Design Info Label */}
+              <div className="mt-4">
+                <p className="font-serif text-sm font-semibold text-[var(--text-primary)]">
+                  {SAMPLE_DESIGNS[activeDesign].title}
+                </p>
+              </div>
+
+              {/* Style Tags - Underlined Text */}
+              <div className="mt-3 flex flex-wrap gap-3">
+                {["Realistic", "Animated", "Anime", "Artistic", "Vintage"].map((style) => (
+                  <span
+                    key={style}
+                    className="text-xs text-[var(--text-secondary)] border-b border-[var(--accent-primary)] pb-0.5"
+                  >
+                    {style}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>

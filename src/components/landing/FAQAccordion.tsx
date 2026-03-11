@@ -46,10 +46,16 @@ export function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-20 md:py-32 bg-[var(--surface-default)]">
+    <section id="faq" className="py-20 md:py-32 bg-[var(--surface-raised)]">
       <Container size="narrow">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-px bg-[var(--accent-primary)]" />
+            <span className="text-xs tracking-[0.2em] uppercase font-medium text-[var(--accent-primary)]">
+              FAQ
+            </span>
+          </div>
           <h2 className="text-4xl md:text-5xl font-serif text-[var(--text-primary)] mb-4">
             Frequently Asked
           </h2>
@@ -59,39 +65,35 @@ export function FAQAccordion() {
         </div>
 
         {/* FAQ Items */}
-        <div className="space-y-4">
+        <div className="divide-y divide-[var(--border-default)]">
           {FAQ_ITEMS.map((item, index) => {
             const isOpen = openIndex === index;
             return (
-              <div
-                key={index}
-                className={cn(
-                  "border border-[var(--border-default)] rounded-[16px] overflow-hidden transition-all duration-200",
-                  isOpen && "border-[var(--border-hover)] shadow-[var(--shadow-soft)]"
-                )}
-              >
+              <div key={index}>
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between p-6 text-left hover:bg-[var(--surface-raised)] transition-colors"
+                  className="w-full flex items-start justify-between py-6 text-left hover:bg-[var(--surface-overlay)] transition-colors group"
                 >
-                  <span className="text-lg font-semibold text-[var(--text-primary)] pr-4">
-                    {item.question}
-                  </span>
+                  <div className="flex items-start gap-4 flex-1">
+                    <span className="text-xs font-serif text-[var(--text-tertiary)] min-w-fit pt-1 group-hover:text-[var(--accent-primary)] transition-colors">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-lg font-serif transition-colors",
+                        isOpen ? "text-[var(--accent-primary)]" : "text-[var(--text-primary)]"
+                      )}
+                    >
+                      {item.question}
+                    </span>
+                  </div>
                   <span
                     className={cn(
-                      "flex-shrink-0 w-8 h-8 rounded-full bg-[var(--surface-default)] flex items-center justify-center transition-transform duration-200",
-                      isOpen && "rotate-180"
+                      "flex-shrink-0 text-[var(--accent-primary)] transition-transform duration-200 ml-4 pt-0.5",
+                      isOpen ? "rotate-45" : ""
                     )}
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="w-4 h-4 text-[var(--text-secondary)]"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                    +
                   </span>
                 </button>
                 <div
@@ -101,7 +103,7 @@ export function FAQAccordion() {
                   )}
                 >
                   <div className="overflow-hidden">
-                    <p className="px-6 pb-6 text-[var(--text-secondary)] leading-relaxed">
+                    <p className="pl-12 pb-6 text-[var(--text-secondary)] leading-relaxed">
                       {item.answer}
                     </p>
                   </div>

@@ -18,7 +18,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-semibold text-[var(--text-primary)] mb-2"
+            className="block text-sm font-medium tracking-wide text-[var(--text-primary)] mb-2"
           >
             {label}
             {props.required && (
@@ -42,7 +42,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               placeholder:text-[var(--text-tertiary)]
               transition-all duration-200
               hover:border-[var(--border-hover)]
-              focus:outline-none focus:border-[var(--accent-primary)]/40 focus:ring-1 focus:ring-[var(--accent-primary)]/20
+              focus:outline-none focus:border-[var(--accent-primary)]/40 focus:ring-2 focus:ring-[var(--accent-primary)]/12
               disabled:opacity-50 disabled:cursor-not-allowed`,
               prefix && "pl-14",
               error && "border-[var(--accent-error)] focus:border-[var(--accent-error)] focus:ring-[var(--accent-error)]",

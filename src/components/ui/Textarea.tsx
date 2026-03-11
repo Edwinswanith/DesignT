@@ -17,7 +17,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="block text-sm font-semibold text-[var(--text-primary)] mb-2"
+            className="block text-sm font-medium tracking-wide text-[var(--text-primary)] mb-2"
           >
             {label}
             {props.required && (
@@ -35,7 +35,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             placeholder:text-[var(--text-tertiary)]
             transition-all duration-200 resize-none
             hover:border-[var(--border-hover)]
-            focus:outline-none focus:border-[var(--accent-primary)]/40 focus:ring-1 focus:ring-[var(--accent-primary)]/20
+            focus:outline-none focus:border-[var(--accent-primary)]/40 focus:ring-2 focus:ring-[var(--accent-primary)]/12
             disabled:opacity-50 disabled:cursor-not-allowed`,
             error && "border-[var(--accent-error)] focus:border-[var(--accent-error)] focus:ring-[var(--accent-error)]",
             className
