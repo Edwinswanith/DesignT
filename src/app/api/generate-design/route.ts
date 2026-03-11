@@ -35,8 +35,8 @@ interface RequestBody {
   };
 }
 
-// Minimal context for t-shirt printing - allows user full creative freedom
-const TSHIRT_PRINT_CONTEXT = `Output should be a clean image.`;
+// Context for t-shirt printing - transparent background for clean overlay
+const TSHIRT_PRINT_CONTEXT = `IMPORTANT: Generate the design on a plain solid white background with NO gradients, NO textures, NO patterns in the background. The subject/design should be the ONLY element — no background scenery, no environment. Keep the background completely clean and white so it can be easily removed for t-shirt printing.`;
 
 // Context for combining multiple images (family photos)
 const MULTI_IMAGE_CONTEXT = `Combine the uploaded images into a cohesive composition.

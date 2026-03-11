@@ -36,13 +36,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              `w-full h-12 px-4 text-base
-              bg-[var(--surface-raised)] text-[var(--text-primary)]
-              border border-[var(--border-default)] rounded-[10px]
+              `w-full h-11 px-4 text-sm
+              bg-[var(--surface-overlay)] text-[var(--text-primary)]
+              border border-[var(--border-default)] rounded-xl
               placeholder:text-[var(--text-tertiary)]
               transition-all duration-200
               hover:border-[var(--border-hover)]
-              focus:outline-none focus:border-[var(--brand-charcoal)] focus:ring-1 focus:ring-[var(--brand-charcoal)]
+              focus:outline-none focus:border-[var(--accent-primary)]/40 focus:ring-1 focus:ring-[var(--accent-primary)]/20
               disabled:opacity-50 disabled:cursor-not-allowed`,
               prefix && "pl-14",
               error && "border-[var(--accent-error)] focus:border-[var(--accent-error)] focus:ring-[var(--accent-error)]",

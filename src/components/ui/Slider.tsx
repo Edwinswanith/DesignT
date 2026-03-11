@@ -38,7 +38,7 @@ const Slider = forwardRef<HTMLInputElement, SliderProps>(
               </label>
             )}
             {showValue && (
-              <span className="text-sm font-medium text-[var(--text-secondary)]">
+              <span className="text-xs font-medium text-[var(--text-tertiary)] tabular-nums">
                 {formatValue(currentValue)}
               </span>
             )}
@@ -50,22 +50,23 @@ const Slider = forwardRef<HTMLInputElement, SliderProps>(
           type="range"
           value={value}
           className={cn(
-            `w-full h-2 rounded-full appearance-none cursor-pointer
+            `w-full h-1.5 rounded-full appearance-none cursor-pointer
             bg-[var(--border-default)]
             [&::-webkit-slider-thumb]:appearance-none
-            [&::-webkit-slider-thumb]:w-5
-            [&::-webkit-slider-thumb]:h-5
+            [&::-webkit-slider-thumb]:w-4
+            [&::-webkit-slider-thumb]:h-4
             [&::-webkit-slider-thumb]:rounded-full
-            [&::-webkit-slider-thumb]:bg-[var(--brand-charcoal)]
+            [&::-webkit-slider-thumb]:bg-[var(--accent-primary)]
+            [&::-webkit-slider-thumb]:shadow-[0_0_8px_rgba(79,109,245,0.25)]
             [&::-webkit-slider-thumb]:cursor-pointer
             [&::-webkit-slider-thumb]:transition-transform
             [&::-webkit-slider-thumb]:duration-150
             [&::-webkit-slider-thumb]:hover:scale-110
             [&::-webkit-slider-thumb]:active:scale-95
-            [&::-moz-range-thumb]:w-5
-            [&::-moz-range-thumb]:h-5
+            [&::-moz-range-thumb]:w-4
+            [&::-moz-range-thumb]:h-4
             [&::-moz-range-thumb]:rounded-full
-            [&::-moz-range-thumb]:bg-[var(--brand-charcoal)]
+            [&::-moz-range-thumb]:bg-[var(--accent-primary)]
             [&::-moz-range-thumb]:border-0
             [&::-moz-range-thumb]:cursor-pointer
             focus:outline-none

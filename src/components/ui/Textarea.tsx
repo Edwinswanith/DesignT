@@ -29,13 +29,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={cn(
-            `w-full min-h-[120px] px-4 py-3 text-base
-            bg-[var(--surface-raised)] text-[var(--text-primary)]
-            border border-[var(--border-default)] rounded-[10px]
+            `w-full min-h-[120px] px-4 py-3 text-sm
+            bg-[var(--surface-overlay)] text-[var(--text-primary)]
+            border border-[var(--border-default)] rounded-xl
             placeholder:text-[var(--text-tertiary)]
             transition-all duration-200 resize-none
             hover:border-[var(--border-hover)]
-            focus:outline-none focus:border-[var(--brand-charcoal)] focus:ring-1 focus:ring-[var(--brand-charcoal)]
+            focus:outline-none focus:border-[var(--accent-primary)]/40 focus:ring-1 focus:ring-[var(--accent-primary)]/20
             disabled:opacity-50 disabled:cursor-not-allowed`,
             error && "border-[var(--accent-error)] focus:border-[var(--accent-error)] focus:ring-[var(--accent-error)]",
             className

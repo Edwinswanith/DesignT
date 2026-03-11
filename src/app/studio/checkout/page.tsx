@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StudioLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
-import { TShirtPreview } from "@/components/studio";
+import { TShirtPreview, ShowBackButton } from "@/components/studio";
 import { PaymentOptions, TrustBadges } from "@/components/checkout";
 import { useDesignStore } from "@/stores/useDesignStore";
 import { useProductStore } from "@/stores/useProductStore";
@@ -16,9 +16,10 @@ import { calculatePricing, formatPrice } from "@/constants/pricing";
 export default function CheckoutPage() {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [side, setSide] = useState<"front" | "back">("front");
 
-  const { mode, currentDesign, uploadedImage } = useDesignStore();
-  const { color, size, quantity, designPosition } = useProductStore();
+  const { mode, currentDesign, uploadedImage, backDesign } = useDesignStore();
+  const { color, size, quantity, designPosition, backDesignPosition } = useProductStore();
   const { name, phone, email, address, city, pincode, paymentMethod } =
     useCustomerStore();
 
@@ -77,13 +78,19 @@ export default function CheckoutPage() {
 
             <div className="flex gap-6">
               {/* Product Image */}
-              <div className="w-32 flex-shrink-0">
+              <div className="w-32 flex-shrink-0 space-y-2">
                 <TShirtPreview
                   color={color}
                   designImage={activeDesign}
+                  backDesignImage={backDesign}
                   designPosition={designPosition}
+                  backDesignPosition={backDesignPosition}
                   size="sm"
+                  side={side}
                 />
+                <div className="flex justify-center">
+                  <ShowBackButton side={side} onToggle={setSide} />
+                </div>
               </div>
 
               {/* Product Info */}

@@ -11,6 +11,7 @@ interface DesignState {
   isGenerating: boolean;
   generationError: string | null;
   currentDesign: string | null;
+  backDesign: string | null;
   designHistory: string[];
   uploadedImage: string | null;
   referenceImage: string | null;
@@ -24,6 +25,7 @@ interface DesignActions {
   setGenerating: (isGenerating: boolean) => void;
   setGenerationError: (error: string | null) => void;
   setCurrentDesign: (design: string | null) => void;
+  setBackDesign: (design: string | null) => void;
   addToHistory: (design: string) => void;
   selectFromHistory: (design: string) => void;
   setUploadedImage: (image: string | null) => void;
@@ -39,6 +41,7 @@ const initialState: DesignState = {
   isGenerating: false,
   generationError: null,
   currentDesign: null,
+  backDesign: null,
   designHistory: [],
   uploadedImage: null,
   referenceImage: null,
@@ -61,6 +64,8 @@ export const useDesignStore = create<DesignState & DesignActions>()(
       setGenerationError: (generationError) => set({ generationError }),
 
       setCurrentDesign: (currentDesign) => set({ currentDesign }),
+
+      setBackDesign: (backDesign) => set({ backDesign }),
 
       addToHistory: (design) => {
         const history = get().designHistory;

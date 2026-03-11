@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build
+.next
+out
+build
+dist
+
+# Git
+.git
+.gitignore
+
+# Env (use build args or compose env instead)
+.env*
+!.env.example
+
+# IDE / OS
+.idea
+.vscode
+*.swp
+.DS_Store
+Thumbs.db
+
+# Debug / test
+npm-debug.log*
+.yarn-integrity
+coverage
+.nyc_output
+*.log
+
+# Misc
+README.md
+docs
+.cursor
+.mcp.json
+*.md

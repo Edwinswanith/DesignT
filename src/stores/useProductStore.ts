@@ -9,6 +9,7 @@ import { PRICING } from "@/constants/pricing";
 interface DesignPosition {
   y: number;
   scale: number;
+  rotation: number;
 }
 
 interface ProductState {
@@ -16,6 +17,7 @@ interface ProductState {
   size: SizeId;
   quantity: number;
   designPosition: DesignPosition;
+  backDesignPosition: DesignPosition;
   unitPrice: number;
 }
 
@@ -26,6 +28,7 @@ interface ProductActions {
   incrementQuantity: () => void;
   decrementQuantity: () => void;
   setDesignPosition: (position: Partial<DesignPosition>) => void;
+  setBackDesignPosition: (position: Partial<DesignPosition>) => void;
   resetPosition: () => void;
   reset: () => void;
 }
@@ -33,6 +36,7 @@ interface ProductActions {
 const DEFAULT_POSITION: DesignPosition = {
   y: 35,
   scale: 1,
+  rotation: 0,
 };
 
 const initialState: ProductState = {
@@ -40,6 +44,7 @@ const initialState: ProductState = {
   size: "M",
   quantity: 1,
   designPosition: DEFAULT_POSITION,
+  backDesignPosition: DEFAULT_POSITION,
   unitPrice: PRICING.BASE_PRICE,
 };
 
@@ -82,15 +87,42 @@ export const useProductStore = create<ProductState & ProductActions>()(
         const newScale = position.scale !== undefined
           ? Math.max(0.5, Math.min(1.5, position.scale))
           : current.scale;
+        const newRotation = position.rotation !== undefined
+          ? Math.max(-45, Math.min(45, position.rotation))
+          : current.rotation;
         set({
           designPosition: {
             y: newY,
             scale: newScale,
+            rotation: newRotation,
           },
         });
       },
 
-      resetPosition: () => set({ designPosition: DEFAULT_POSITION }),
+      setBackDesignPosition: (position) => {
+        const current = get().backDesignPosition;
+        const newY = position.y !== undefined
+          ? Math.max(20, Math.min(70, position.y))
+          : current.y;
+        const newScale = position.scale !== undefined
+          ? Math.max(0.5, Math.min(1.5, position.scale))
+          : current.scale;
+        const newRotation = position.rotation !== undefined
+          ? Math.max(-45, Math.min(45, position.rotation))
+          : current.rotation;
+        set({
+          backDesignPosition: {
+            y: newY,
+            scale: newScale,
+            rotation: newRotation,
+          },
+        });
+      },
+
+      resetPosition: () => set({
+        designPosition: DEFAULT_POSITION,
+        backDesignPosition: DEFAULT_POSITION,
+      }),
 
       reset: () => set(initialState),
     }),

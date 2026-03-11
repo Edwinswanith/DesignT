@@ -1,6 +1,7 @@
 "use client";
 
-import { TShirtPreview } from "@/components/studio";
+import { useState } from "react";
+import { TShirtPreview, ShowBackButton } from "@/components/studio";
 import { useDesignStore } from "@/stores/useDesignStore";
 import { useProductStore } from "@/stores/useProductStore";
 import { useCustomerStore } from "@/stores/useCustomerStore";
@@ -13,8 +14,9 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({ showDelivery = false }: OrderSummaryProps) {
-  const { mode, currentDesign, uploadedImage } = useDesignStore();
-  const { color, size, quantity, designPosition } = useProductStore();
+  const [side, setSide] = useState<"front" | "back">("front");
+  const { mode, currentDesign, uploadedImage, backDesign } = useDesignStore();
+  const { color, size, quantity, designPosition, backDesignPosition } = useProductStore();
   const { paymentMethod, address, city, pincode } = useCustomerStore();
 
   const activeDesign = mode === "ai" ? currentDesign : uploadedImage;
@@ -29,13 +31,19 @@ export function OrderSummary({ showDelivery = false }: OrderSummaryProps) {
       </h3>
 
       {/* Mini Preview */}
-      <div className="mb-6">
+      <div className="mb-6 space-y-2">
         <TShirtPreview
           color={color}
           designImage={activeDesign}
+          backDesignImage={backDesign}
           designPosition={designPosition}
+          backDesignPosition={backDesignPosition}
           size="sm"
+          side={side}
         />
+        <div className="flex justify-center">
+          <ShowBackButton side={side} onToggle={setSide} />
+        </div>
       </div>
 
       {/* Selected Options */}

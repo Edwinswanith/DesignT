@@ -6,9 +6,9 @@ import { preprocessImage, needsPreprocessing } from "@/lib/imagePreprocess";
 
 interface AttachedImage {
   id: string;
-  data: string; // Full data URL
+  data: string;
   mimeType: string;
-  preview: string; // For display
+  preview: string;
 }
 
 interface ChatInputProps {
@@ -52,13 +52,10 @@ export function ChatInput({
     reader.onload = async () => {
       try {
         const result = reader.result as string;
-
-        // Preprocess large images for better API performance
         let processedData = result;
         let processedMimeType = file.type;
 
         if (needsPreprocessing(result)) {
-          console.log("[ChatInput] Large image detected, preprocessing...");
           const processed = await preprocessImage(result, {
             maxWidth: 1024,
             maxHeight: 1024,
@@ -88,22 +85,15 @@ export function ChatInput({
         setError("Failed to process image");
       }
     };
-    reader.onerror = () => {
-      setError("Failed to read image");
-    };
+    reader.onerror = () => setError("Failed to read image");
     reader.readAsDataURL(file);
   }, []);
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (files) {
-        Array.from(files).forEach(processFile);
-      }
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (files) Array.from(files).forEach(processFile);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     },
     [processFile]
   );
@@ -113,9 +103,7 @@ export function ChatInput({
   }, []);
 
   const handleSend = useCallback(() => {
-    if ((!message.trim() && attachedImages.length === 0) || isDisabled) {
-      return;
-    }
+    if ((!message.trim() && attachedImages.length === 0) || isDisabled) return;
 
     const images = attachedImages.map((img) => ({
       data: img.data,
@@ -145,9 +133,7 @@ export function ChatInput({
         if (item.type.startsWith("image/")) {
           e.preventDefault();
           const file = item.getAsFile();
-          if (file) {
-            processFile(file);
-          }
+          if (file) processFile(file);
           break;
         }
       }
@@ -155,7 +141,6 @@ export function ChatInput({
     [processFile]
   );
 
-  // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -173,20 +158,16 @@ export function ChatInput({
       e.preventDefault();
       e.stopPropagation();
       setIsDragOver(false);
-
       const files = e.dataTransfer.files;
       if (files) {
         Array.from(files).forEach((file) => {
-          if (file.type.startsWith("image/")) {
-            processFile(file);
-          }
+          if (file.type.startsWith("image/")) processFile(file);
         });
       }
     },
     [processFile]
   );
 
-  // Auto-resize textarea
   const adjustTextareaHeight = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -199,23 +180,23 @@ export function ChatInput({
 
   return (
     <div
-      className="space-y-3"
+      className="space-y-2.5"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       {/* Drag overlay */}
       {isDragOver && (
-        <div className="fixed inset-0 bg-[var(--brand-charcoal)]/10 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none">
-          <div className="bg-white rounded-[24px] p-8 shadow-2xl border-2 border-dashed border-[var(--brand-charcoal)] animate-scale-in">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none">
+          <div className="rounded-2xl p-8 border-2 border-dashed border-[var(--accent-primary)] bg-[var(--surface-overlay)] shadow-2xl animate-scale-in">
             <div className="text-center">
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand-charcoal)" strokeWidth="1.5" className="w-12 h-12 mx-auto mb-3">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="1.5" className="w-10 h-10 mx-auto mb-3">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <p className="text-lg font-medium text-[var(--text-primary)]">Drop images here</p>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">PNG, JPG, or WebP up to {MAX_SIZE_MB}MB</p>
+              <p className="text-base font-medium text-[var(--text-primary)]">Drop images here</p>
+              <p className="text-sm text-[var(--text-tertiary)] mt-1">PNG, JPG, or WebP up to {MAX_SIZE_MB}MB</p>
             </div>
           </div>
         </div>
@@ -223,19 +204,19 @@ export function ChatInput({
 
       {/* Attached Images Preview */}
       {attachedImages.length > 0 && (
-        <div className="flex flex-wrap gap-3 p-4 bg-[var(--surface-raised)] rounded-[16px] border border-[var(--border-default)] animate-scale-in">
+        <div className="flex flex-wrap gap-2 p-3 bg-[var(--surface-overlay)] rounded-xl border border-[var(--border-default)] animate-scale-in relative">
           {attachedImages.map((img) => (
             <div key={img.id} className="relative group">
               <img
                 src={img.preview}
                 alt="Attached"
-                className="w-20 h-20 object-cover rounded-[12px] border border-[var(--border-default)] shadow-sm transition-transform duration-200 group-hover:scale-105"
+                className="w-16 h-16 object-cover rounded-lg border border-[var(--border-default)] transition-transform duration-200 group-hover:scale-105"
               />
               <button
                 onClick={() => handleRemoveImage(img.id)}
-                className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--accent-error)] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md hover:scale-110"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[var(--accent-error)] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md hover:scale-110"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-2.5 h-2.5">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -245,26 +226,24 @@ export function ChatInput({
           {attachedImages.length < MAX_IMAGES && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-20 h-20 rounded-[12px] border-2 border-dashed border-[var(--border-default)] hover:border-[var(--brand-charcoal)] flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all duration-200 hover:bg-[var(--surface-default)]"
+              className="w-16 h-16 rounded-lg border border-dashed border-[var(--border-hover)] hover:border-[var(--accent-primary)]/40 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition-all duration-200"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </button>
           )}
-
-          {/* Attachment count badge */}
-          <div className="absolute top-2 right-2 px-2 py-0.5 bg-[var(--brand-charcoal)] text-white text-xs rounded-full">
+          <span className="absolute top-1.5 right-2 text-[10px] text-[var(--text-tertiary)]">
             {attachedImages.length}/{MAX_IMAGES}
-          </div>
+          </span>
         </div>
       )}
 
-      {/* Error Message */}
+      {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-[var(--accent-error)]/10 border border-[var(--accent-error)]/20 animate-scale-in">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-error)" strokeWidth="2" className="w-4 h-4 flex-shrink-0">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--accent-error)]/10 border border-[var(--accent-error)]/20 animate-scale-in">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-error)" strokeWidth="1.5" className="w-4 h-4 flex-shrink-0">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
             <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -276,14 +255,14 @@ export function ChatInput({
       {/* Input Area */}
       <div
         className={cn(
-          "flex items-end gap-3 p-3 rounded-[20px] border-2 transition-all duration-300",
+          "flex items-end gap-2 p-2.5 rounded-2xl border transition-all duration-300",
           isDisabled
-            ? "bg-[var(--surface-default)] border-[var(--border-default)] opacity-60"
+            ? "bg-[var(--surface-default)] border-[var(--border-default)] opacity-50"
             : isDragOver
-            ? "bg-[var(--accent-success)]/5 border-[var(--accent-success)]"
+            ? "bg-[var(--accent-primary)]/5 border-[var(--accent-primary)]/30"
             : isFocused
-            ? "bg-[var(--surface-raised)] border-[var(--brand-charcoal)] shadow-[0_0_0_4px_rgba(26,26,26,0.06)]"
-            : "bg-[var(--surface-raised)] border-[var(--border-default)] hover:border-[var(--border-hover)]"
+            ? "bg-[var(--surface-overlay)] border-[var(--border-hover)] shadow-[0_0_0_3px_rgba(79,109,245,0.08)]"
+            : "bg-[var(--surface-overlay)] border-[var(--border-default)] hover:border-[var(--border-hover)]"
         )}
       >
         {/* Image Upload Button */}
@@ -291,15 +270,15 @@ export function ChatInput({
           onClick={() => fileInputRef.current?.click()}
           disabled={isDisabled || attachedImages.length >= MAX_IMAGES}
           className={cn(
-            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200",
+            "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
             isDisabled || attachedImages.length >= MAX_IMAGES
               ? "text-[var(--text-tertiary)] cursor-not-allowed"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-default)] active:scale-95"
+              : "text-[var(--text-secondary)] hover:text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/8 active:scale-95"
           )}
           title={attachedImages.length >= MAX_IMAGES ? "Maximum images reached" : "Attach image"}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4.5 h-4.5">
+            <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
             <circle cx="8.5" cy="8.5" r="1.5" />
             <polyline points="21 15 16 10 5 21" />
           </svg>
@@ -340,13 +319,13 @@ export function ChatInput({
           onClick={handleSend}
           disabled={!canSend}
           className={cn(
-            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200",
+            "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
             !canSend
               ? "bg-[var(--surface-default)] text-[var(--text-tertiary)] cursor-not-allowed"
-              : "bg-[var(--brand-charcoal)] text-white hover:bg-[var(--brand-black)] active:scale-95 shadow-md hover:shadow-lg"
+              : "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary-hover)] hover:shadow-md active:scale-95 shadow-sm"
           )}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
             <line x1="22" y1="2" x2="11" y2="13" />
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>
@@ -354,21 +333,21 @@ export function ChatInput({
       </div>
 
       {/* Helper Text */}
-      <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)] px-1">
+      <div className="flex items-center justify-between text-[10px] text-[var(--text-tertiary)] px-1 opacity-60">
         <p className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 bg-[var(--surface-raised)] border border-[var(--border-default)] rounded text-[10px] font-mono">Enter</kbd>
-          <span>to send</span>
-          <span className="mx-1 text-[var(--border-default)]">|</span>
-          <kbd className="px-1.5 py-0.5 bg-[var(--surface-raised)] border border-[var(--border-default)] rounded text-[10px] font-mono">Shift + Enter</kbd>
+          <kbd className="px-1 py-0.5 bg-[var(--surface-overlay)] border border-[var(--border-default)] rounded text-[9px] font-mono">Enter</kbd>
+          <span>send</span>
+          <span className="mx-0.5 text-[var(--border-hover)]">/</span>
+          <kbd className="px-1 py-0.5 bg-[var(--surface-overlay)] border border-[var(--border-default)] rounded text-[9px] font-mono">Shift+Enter</kbd>
           <span>new line</span>
         </p>
         <p className="flex items-center gap-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-2.5 h-2.5">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
             <circle cx="8.5" cy="8.5" r="1.5" />
             <polyline points="21 15 16 10 5 21" />
           </svg>
-          <span>Drop or paste images</span>
+          Drop or paste images
         </p>
       </div>
     </div>

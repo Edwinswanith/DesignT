@@ -8,8 +8,11 @@ import { TShirtColorId } from "@/constants/colors";
 interface TShirtPreviewProps {
   color: TShirtColorId;
   designImage: string | null;
-  designPosition?: { y: number; scale: number };
+  backDesignImage?: string | null;
+  designPosition?: { y: number; scale: number; rotation?: number };
+  backDesignPosition?: { y: number; scale: number; rotation?: number };
   size?: "sm" | "md" | "lg";
+  side?: "front" | "back";
   className?: string;
 }
 
@@ -25,8 +28,11 @@ const MOCKUP_IMAGES: Record<TShirtColorId, string> = {
 export function TShirtPreview({
   color,
   designImage,
-  designPosition = { y: 35, scale: 1 },
+  backDesignImage = null,
+  designPosition = { y: 35, scale: 1, rotation: 0 },
+  backDesignPosition = { y: 35, scale: 1, rotation: 0 },
   size = "md",
+  side = "front",
   className,
 }: TShirtPreviewProps) {
   const mockupImage = MOCKUP_IMAGES[color];
@@ -39,14 +45,20 @@ export function TShirtPreview({
     lg: "max-w-[400px]",
   };
 
+  // Use the appropriate position based on side
+  const currentPosition = side === "back" ? backDesignPosition : designPosition;
+
   // Calculate design dimensions based on scale
-  const designWidth = 42 * designPosition.scale;
-  const designTop = designPosition.y + 5;
+  const designWidth = 42 * currentPosition.scale;
+  const designTop = currentPosition.y + 5;
+
+  // Determine active design based on side
+  const activeDesign = side === "back" ? backDesignImage : designImage;
 
   return (
     <div className={cn("relative w-full mx-auto", sizes[size], className)}>
       {/* Realistic T-shirt mockup */}
-      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-50">
+      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[var(--surface-inset)]">
         {/* Chest-shaped clip-path for design overlay (print area) */}
         <svg aria-hidden className="absolute w-0 h-0" focusable="false">
           <defs>
@@ -74,15 +86,16 @@ export function TShirtPreview({
         </svg>
         <Image
           src={mockupImage}
-          alt={`${color} t-shirt`}
+          alt={`${color} t-shirt ${side}`}
           fill
           className="object-contain"
           sizes="(max-width: 768px) 200px, 400px"
           priority
+          style={{ transform: side === "back" ? "scaleX(-1)" : undefined }}
         />
 
         {/* Design Overlay */}
-        {designImage && (
+        {activeDesign && (
           <div
             className="absolute pointer-events-none transition-all duration-300 ease-out overflow-hidden"
             style={{
@@ -91,18 +104,18 @@ export function TShirtPreview({
               width: `${designWidth}%`,
               clipPath: `url(#${clipId})`,
               transform: size === "sm"
-                ? "translateX(-50%)"
-                : "perspective(600px) rotateX(4deg) rotateY(0deg) translateX(-50%)",
-              transformOrigin: "center top",
+                ? `translateX(-50%) rotate(${currentPosition.rotation || 0}deg)`
+                : `perspective(600px) rotateX(4deg) rotateY(0deg) translateX(-50%) rotate(${currentPosition.rotation || 0}deg)`,
+              transformOrigin: "center center",
             }}
           >
             <img
               src={
-                designImage.startsWith("data:")
-                  ? designImage
-                  : `data:image/png;base64,${designImage}`
+                activeDesign.startsWith("data:")
+                  ? activeDesign
+                  : `data:image/png;base64,${activeDesign}`
               }
-              alt="Your design"
+              alt={`Design for ${side}`}
               className="w-full h-auto object-contain"
               style={{
                 mixBlendMode: color === "midnight-black" ? "screen" : "multiply",
@@ -125,7 +138,7 @@ export function TShirtPreview({
         )}
 
         {/* Empty State Placeholder */}
-        {!designImage && (
+        {!activeDesign && (
           <div
             className="absolute left-1/2 -translate-x-1/2 w-[35%] aspect-square flex items-center justify-center rounded-xl border-2 border-dashed transition-all duration-300"
             style={{
@@ -165,7 +178,7 @@ export function TShirtPreview({
                       : "rgba(0,0,0,0.35)",
                 }}
               >
-                Your design
+                {side === "back" ? "Back design" : "Your design"}
               </span>
             </div>
           </div>

@@ -9,7 +9,6 @@ interface StyleSelectorProps {
   size?: "default" | "compact";
 }
 
-// Icon components for each style
 function StyleIcon({ icon, className }: { icon: string; className?: string }) {
   const iconClass = cn("w-5 h-5", className);
 
@@ -81,7 +80,7 @@ export function StyleSelector({
   if (size === "compact") {
     return (
       <div className="space-y-2">
-        <label className="block text-xs font-medium text-[var(--text-secondary)]">
+        <label className="block text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
           Style
         </label>
         <div className="flex flex-wrap gap-1.5">
@@ -93,10 +92,10 @@ export function StyleSelector({
                 onClick={() => onChange(style.id)}
                 title={style.hint || "Any style"}
                 className={cn(
-                  "px-3 py-1.5 text-xs rounded-full border transition-all duration-200",
+                  "px-3 py-1.5 text-xs font-medium rounded-xl border transition-all duration-200",
                   isSelected
-                    ? "border-[var(--brand-charcoal)] bg-[var(--brand-charcoal)] text-white"
-                    : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--brand-charcoal)] hover:text-[var(--text-primary)]"
+                    ? "border-[var(--border-accent)] bg-[var(--accent-primary)]/8 text-[var(--accent-primary)]"
+                    : "border-[var(--border-default)] text-[var(--text-tertiary)] hover:border-[var(--border-hover)] hover:text-[var(--text-secondary)]"
                 )}
               >
                 {style.label}
@@ -121,10 +120,10 @@ export function StyleSelector({
               key={style.id}
               onClick={() => onChange(style.id)}
               className={cn(
-                "flex flex-col items-center p-3 rounded-[12px] border-2 transition-all duration-200",
+                "flex flex-col items-center p-3 rounded-xl border transition-all duration-200",
                 isSelected
-                  ? "border-[var(--brand-charcoal)] bg-[var(--brand-charcoal)]/5"
-                  : "border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface-raised)]"
+                  ? "border-[var(--border-accent)] bg-[var(--accent-primary)]/8"
+                  : "border-[var(--border-default)] hover:border-[var(--border-hover)] bg-[var(--surface-overlay)]"
               )}
             >
               <StyleIcon
@@ -132,7 +131,7 @@ export function StyleSelector({
                 className={cn(
                   "mb-2",
                   isSelected
-                    ? "text-[var(--brand-charcoal)]"
+                    ? "text-[var(--accent-primary)]"
                     : "text-[var(--text-tertiary)]"
                 )}
               />
@@ -140,7 +139,7 @@ export function StyleSelector({
                 className={cn(
                   "text-xs font-medium",
                   isSelected
-                    ? "text-[var(--text-primary)]"
+                    ? "text-[var(--accent-primary)]"
                     : "text-[var(--text-secondary)]"
                 )}
               >

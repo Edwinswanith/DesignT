@@ -23,7 +23,7 @@ export function SizeSelector({
           Size
         </label>
         {showMeasurements && (
-          <span className="text-sm text-[var(--text-secondary)]">
+          <span className="text-xs text-[var(--text-tertiary)]">
             {selectedSize.chest} chest
           </span>
         )}
@@ -31,7 +31,7 @@ export function SizeSelector({
 
       {/* Adult Sizes */}
       <div>
-        <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
+        <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest mb-2">
           Adult
         </p>
         <div className="flex flex-wrap gap-2">
@@ -42,10 +42,10 @@ export function SizeSelector({
                 key={size.id}
                 onClick={() => onChange(size.id)}
                 className={cn(
-                  "min-w-[60px] px-4 py-3 rounded-[10px] border-2 text-sm font-semibold transition-all duration-200",
+                  "min-w-[56px] px-3.5 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200",
                   isSelected
-                    ? "border-[var(--brand-charcoal)] bg-[var(--brand-charcoal)] text-[var(--text-inverse)]"
-                    : "border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-primary)] bg-[var(--surface-raised)]"
+                    ? "border-[var(--border-accent)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]"
+                    : "border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-secondary)] bg-[var(--surface-overlay)]"
                 )}
               >
                 {size.label}
@@ -57,7 +57,7 @@ export function SizeSelector({
 
       {/* Kids Sizes */}
       <div>
-        <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
+        <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest mb-2">
           Kids
         </p>
         <div className="flex flex-wrap gap-2">
@@ -68,10 +68,10 @@ export function SizeSelector({
                 key={size.id}
                 onClick={() => onChange(size.id)}
                 className={cn(
-                  "px-4 py-3 rounded-[10px] border-2 text-sm font-semibold transition-all duration-200",
+                  "px-3.5 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200",
                   isSelected
-                    ? "border-[var(--brand-charcoal)] bg-[var(--brand-charcoal)] text-[var(--text-inverse)]"
-                    : "border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-primary)] bg-[var(--surface-raised)]"
+                    ? "border-[var(--border-accent)] bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]"
+                    : "border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-secondary)] bg-[var(--surface-overlay)]"
                 )}
               >
                 {size.label}
