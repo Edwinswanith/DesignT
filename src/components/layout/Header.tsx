@@ -17,9 +17,9 @@ export function Header() {
             <Image
               src="/logo.png"
               alt="DesignT"
-              width={130}
-              height={44}
-              className="h-11 w-auto object-contain"
+              width={180}
+              height={61}
+              className="h-14 w-auto object-contain"
               priority
             />
           </Link>

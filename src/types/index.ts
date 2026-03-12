@@ -19,6 +19,33 @@ export interface DesignState {
 export interface DesignPosition {
   y: number;
   scale: number;
+  rotation?: number;
+}
+
+// Cart Types
+export interface CartItem {
+  id: string;
+  color: TShirtColorId;
+  size: SizeId;
+  quantity: number;
+  designImage: string;
+  backDesignImage?: string | null;
+  designPosition: DesignPosition;
+  backDesignPosition: DesignPosition;
+  aspectRatio: AspectRatioId;
+  mode: "ai" | "upload";
+}
+
+export interface OrderVariant {
+  tshirtColor: TShirtColorId;
+  tshirtSize: SizeId;
+  quantity: number;
+  designUrl: string;
+  backDesignUrl?: string;
+  designPositionY: number;
+  designScale: number;
+  designAspectRatio: AspectRatioId;
+  unitPrice: number;
 }
 
 export interface ProductState {
@@ -81,6 +108,7 @@ export interface Order {
   paymentMethod: "razorpay" | "cod";
   paymentStatus: PaymentStatus;
   status: OrderStatus;
+  variants?: OrderVariant[];
   createdAt: string;
 }
 
@@ -115,6 +143,7 @@ export interface CreateOrderRequest {
   designScale: number;
   designAspectRatio: AspectRatioId;
   paymentMethod: "prepaid" | "cod";
+  variants?: OrderVariant[];
 }
 
 export interface CreateOrderResponse {

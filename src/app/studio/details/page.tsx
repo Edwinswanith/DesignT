@@ -1,30 +1,32 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { StudioLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
 import {
   ContactForm,
   AddressForm,
-  QuantitySelector,
   OrderSummary,
 } from "@/components/checkout";
 import { useDesignStore } from "@/stores/useDesignStore";
 import { useCustomerStore } from "@/stores/useCustomerStore";
+import { useCartStore } from "@/stores/useCartStore";
+import { TSHIRT_COLORS } from "@/constants/colors";
+import { ALL_SIZES } from "@/constants/sizes";
+import type { CartItem } from "@/types";
 
 export default function DetailsPage() {
   const router = useRouter();
-  const { mode, currentDesign, uploadedImage } = useDesignStore();
   const { validate } = useCustomerStore();
+  const { items: cartItems } = useCartStore();
 
-  // Get the active design
-  const activeDesign = mode === "ai" ? currentDesign : uploadedImage;
-
-  // Redirect if no design
-  if (!activeDesign) {
-    router.push("/studio");
-    return null;
-  }
+  // Redirect if no items in cart
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      router.push("/studio");
+    }
+  }, [cartItems.length, router]);
 
   const handleBack = () => {
     router.push("/studio/customize");
@@ -52,9 +54,28 @@ export default function DetailsPage() {
             <AddressForm />
           </div>
 
-          {/* Quantity */}
+          {/* Cart Summary */}
           <div className="p-6 rounded-[20px] bg-[var(--surface-raised)] border border-[var(--border-default)]">
-            <QuantitySelector />
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">
+              Your Cart — {cartItems.length} item{cartItems.length > 1 ? "s" : ""}
+            </h3>
+            <div className="space-y-2">
+              {cartItems.map((item, idx) => {
+                const colorData = TSHIRT_COLORS[item.color];
+                const sizeData = ALL_SIZES[item.size];
+                return (
+                  <div key={item.id} className="flex items-center gap-3 text-sm">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-[var(--border-default)] flex-shrink-0"
+                      style={{ backgroundColor: colorData.hex }}
+                    />
+                    <span className="text-[var(--text-secondary)]">
+                      Item {idx + 1} — {colorData.name} / {sizeData.label} × {item.quantity}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Navigation - Mobile */}

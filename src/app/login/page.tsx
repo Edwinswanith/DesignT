@@ -27,9 +27,9 @@ function LoginContent() {
           <Image
             src="/logo.png"
             alt="DesignT"
-            width={32}
-            height={32}
-            className="h-8 w-auto object-contain rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-300"
+            width={64}
+            height={64}
+            className="h-14 w-auto object-contain"
             priority
           />
           <span className="text-base font-serif tracking-tight text-[var(--text-primary)]">

@@ -9,13 +9,12 @@ import {
   ChatMessage,
   ChatInput,
   ColorSelector,
-  StyleSelector,
-  AspectRatioSelector,
   ShowBackButton,
 } from "@/components/studio";
 import { useConversationStore, MessagePart } from "@/stores/useConversationStore";
 import { useProductStore } from "@/stores/useProductStore";
 import { useDesignStore } from "@/stores/useDesignStore";
+import { TSHIRT_COLORS } from "@/constants/colors";
 
 // Suggestions for empty state
 const PROMPT_SUGGESTIONS = [
@@ -52,6 +51,7 @@ export default function StudioPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [loadingMessage, setLoadingMessage] = useState("Creating your design...");
   const [side, setSide] = useState<"front" | "back">("front");
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
 
   const {
     messages,
@@ -78,6 +78,25 @@ export default function StudioPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Lock body scroll when mobile preview drawer is open
+  useEffect(() => {
+    if (mobilePreviewOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobilePreviewOpen]);
+
+  // Close mobile preview on Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobilePreviewOpen) setMobilePreviewOpen(false);
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [mobilePreviewOpen]);
 
   // Handle sending a message
   const handleSendMessage = useCallback(
@@ -186,10 +205,10 @@ export default function StudioPage() {
 
   return (
     <StudioLayout currentStep={1}>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-[calc(100vh-120px)] min-h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-[calc(100vh-120px)] min-h-[400px] lg:min-h-[600px] min-w-0 w-full">
 
         {/* ── Left Panel — Chat Interface ── */}
-        <div className="lg:col-span-6 flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] bg-[var(--surface-raised)] relative">
+        <div className="lg:col-span-6 flex flex-col rounded-2xl overflow-hidden border border-[var(--border-default)] bg-[var(--surface-raised)] relative min-h-[50vh] lg:min-h-0 min-w-0">
           {/* Subtle top edge highlight */}
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
 
@@ -210,25 +229,27 @@ export default function StudioPage() {
                 </p>
               </div>
             </div>
-            {hasMessages && (
-              <button
-                onClick={handleNewConversation}
-                className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition-colors duration-200 px-2.5 py-1.5 rounded-lg hover:bg-[var(--accent-primary)]/5"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
-                  <path d="M1 4v6h6" />
-                  <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
-                </svg>
-                New
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {hasMessages && (
+                <button
+                  onClick={handleNewConversation}
+                  className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition-colors duration-200 px-2.5 py-1.5 rounded-lg hover:bg-[var(--accent-primary)]/5"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
+                    <path d="M1 4v6h6" />
+                    <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+                  </svg>
+                  New
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 space-y-5 min-w-0">
             {/* Empty State */}
             {!hasMessages && !isGenerating && (
-              <div className="h-full flex flex-col items-center justify-center text-center px-4">
+              <div className="h-full flex flex-col items-center justify-center text-center px-4 min-w-0 w-full">
                 {/* Animated icon cluster */}
                 <div className="relative mb-8 animate-float">
                   <div className="w-16 h-16 rounded-2xl bg-[var(--surface-inset)] flex items-center justify-center border border-[var(--border-default)]">
@@ -250,7 +271,7 @@ export default function StudioPage() {
                 </p>
 
                 {/* Suggestion Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-lg w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg min-w-0">
                   {PROMPT_SUGGESTIONS.map((suggestion, idx) => (
                     <button
                       key={idx}
@@ -274,6 +295,7 @@ export default function StudioPage() {
                 key={message.id}
                 message={message}
                 onSelectDesign={message.role === "model" ? handleSelectDesign : undefined}
+                onUseDesign={message.role === "model" ? (imageData) => { handleSelectDesign(imageData); setMobilePreviewOpen(true); } : undefined}
                 isSelected={
                   message.role === "model" &&
                   message.parts.some(
@@ -337,12 +359,16 @@ export default function StudioPage() {
                   ? "Ask for changes or describe a new design..."
                   : "Describe your t-shirt design idea..."
               }
+              imageStyle={imageStyle}
+              aspectRatio={aspectRatio}
+              onImageStyleChange={setImageStyle}
+              onAspectRatioChange={setAspectRatio}
             />
           </div>
         </div>
 
-        {/* ── Right Panel — Preview & Controls ── */}
-        <div className="lg:col-span-6 flex flex-col gap-4">
+        {/* ── Right Panel — Preview & Controls (desktop only; mobile uses drawer) ── */}
+        <div className="hidden lg:flex lg:col-span-6 flex-col gap-4 min-w-0">
 
           {/* T-Shirt Preview Card */}
           <div className="flex-1 rounded-2xl p-5 border border-[var(--border-default)] bg-[var(--surface-raised)] flex flex-col relative overflow-hidden">
@@ -361,13 +387,11 @@ export default function StudioPage() {
                 Preview
               </h3>
               <div className="flex items-center gap-2">
-                {(selectedDesign || backDesign) && (
-                  <ShowBackButton
-                    side={side}
-                    onToggle={setSide}
-                    hasBackDesign={!!(selectedDesign || backDesign)}
-                  />
-                )}
+                <ShowBackButton
+                  side={side}
+                  onToggle={setSide}
+                  hasBackDesign={true}
+                />
                 {(selectedDesign || backDesign) && (
                   <span className="flex items-center gap-1.5 text-xs text-[var(--accent-success)] bg-[var(--accent-success)]/10 px-2 py-0.5 rounded-full">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
@@ -394,41 +418,6 @@ export default function StudioPage() {
           {/* Design Options Panel */}
           <div className="rounded-2xl p-4 border border-[var(--border-default)] bg-[var(--surface-raised)] space-y-4 relative">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
-
-            <StyleSelector value={imageStyle} onChange={setImageStyle} size="compact" />
-
-            {/* Aspect Ratio */}
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
-                Aspect Ratio
-              </label>
-              <div className="flex gap-1.5">
-                {(["1:1", "16:9", "9:16"] as const).map((ratio) => {
-                  const isActive = aspectRatio === ratio;
-                  return (
-                    <button
-                      key={ratio}
-                      onClick={() => setAspectRatio(ratio)}
-                      className={`
-                        flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border transition-all duration-200
-                        ${isActive
-                          ? "border-[var(--border-accent)] bg-[var(--accent-primary)]/8 text-[var(--accent-primary)]"
-                          : "border-[var(--border-default)] text-[var(--text-tertiary)] hover:border-[var(--border-hover)] hover:text-[var(--text-secondary)]"
-                        }
-                      `}
-                    >
-                      {/* Tiny ratio icon */}
-                      <span className={`
-                        inline-block border rounded-sm
-                        ${isActive ? "border-[var(--accent-primary)]/50" : "border-current opacity-40"}
-                        ${ratio === "1:1" ? "w-2.5 h-2.5" : ratio === "16:9" ? "w-3.5 h-2" : "w-2 h-3.5"}
-                      `} />
-                      {ratio}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             <ColorSelector value={color} onChange={setColor} size="compact" />
           </div>
@@ -458,6 +447,111 @@ export default function StudioPage() {
           )}
         </div>
       </div>
+
+      {/* Mobile Preview Drawer */}
+      {mobilePreviewOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden animate-fade-in"
+            aria-hidden
+            onClick={() => setMobilePreviewOpen(false)}
+          />
+          <div
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(400px,92vw)] bg-[var(--surface-raised)] shadow-2xl border-l border-[var(--border-default)] flex flex-col lg:hidden animate-slide-in-right"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Preview"
+          >
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border-default)] shrink-0">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">Preview</h3>
+              <button
+                type="button"
+                onClick={() => setMobilePreviewOpen(false)}
+                className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-inset)] transition-colors"
+                aria-label="Close preview"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
+              {/* T-Shirt Preview Card */}
+              <div className="rounded-2xl p-5 border border-[var(--border-default)] bg-[var(--surface-raised)] flex flex-col relative overflow-hidden">
+                {selectedDesign && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-[var(--accent-primary)]/5 blur-3xl" />
+                  </div>
+                )}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">Preview</span>
+                  {(selectedDesign || backDesign) && (
+                    <span className="flex items-center gap-1.5 text-xs text-[var(--accent-success)] bg-[var(--accent-success)]/10 px-2 py-0.5 rounded-full">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Design selected
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 flex items-center justify-center relative min-h-[280px]">
+                  <TShirtPreview
+                    color={color}
+                    designImage={selectedDesign}
+                    backDesignImage={backDesign}
+                    designPosition={designPosition}
+                    size="lg"
+                    side={side}
+                  />
+                </div>
+              </div>
+
+              {/* Design Options Panel */}
+              <div className="rounded-2xl p-4 border border-[var(--border-default)] bg-[var(--surface-raised)] space-y-4 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)] shrink-0">
+                      Color
+                    </span>
+                    <ShowBackButton side={side} onToggle={setSide} hasBackDesign={true} />
+                  </div>
+                  <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                    {TSHIRT_COLORS[color].name}
+                  </span>
+                </div>
+                <ColorSelector value={color} onChange={setColor} size="compact" hideLabelRow />
+              </div>
+
+              <Button
+                size="lg"
+                disabled={!selectedDesign}
+                onClick={() => {
+                  setMobilePreviewOpen(false);
+                  handleContinue();
+                }}
+                className="w-full"
+              >
+                Continue to Customize
+                <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </Button>
+
+              {!selectedDesign && hasMessages && (
+                <p className="text-xs text-[var(--text-tertiary)] text-center flex items-center justify-center gap-1.5">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
+                    <path d="M15 15l-2 5L9 9l11 4-5 2z" />
+                  </svg>
+                  Click on a generated design to select it
+                </p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </StudioLayout>
   );
 }

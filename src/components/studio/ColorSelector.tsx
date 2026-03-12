@@ -7,19 +7,23 @@ interface ColorSelectorProps {
   value: TShirtColorId;
   onChange: (color: TShirtColorId) => void;
   size?: "compact" | "full";
+  /** When true, only swatches are shown (no "Color" label / color name row) */
+  hideLabelRow?: boolean;
 }
 
 export function ColorSelector({
   value,
   onChange,
   size = "full",
+  hideLabelRow = false,
 }: ColorSelectorProps) {
   const selectedColor = TSHIRT_COLORS[value];
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className={cn(
+      {!hideLabelRow && (
+        <div className="flex items-center justify-between">
+          <label className={cn(
           "block font-semibold",
           size === "compact"
             ? "text-xs uppercase tracking-widest text-[var(--text-tertiary)]"
@@ -31,6 +35,7 @@ export function ColorSelector({
           {selectedColor.name}
         </span>
       </div>
+      )}
       <div className={cn("flex", size === "compact" ? "gap-2" : "gap-3")}>
         {TSHIRT_COLOR_LIST.map((color) => {
           const isSelected = value === color.id;

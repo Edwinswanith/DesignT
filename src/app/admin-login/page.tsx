@@ -42,7 +42,7 @@ function AdminLoginContent() {
       {/* Back to home — top left */}
       <div className="absolute top-5 left-6">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <Image src="/logo.png" alt="DesignT" width={32} height={32} className="h-8 w-auto object-contain rounded-lg shadow-sm group-hover:shadow-md transition-shadow duration-300" priority />
+          <Image src="/logo.png" alt="DesignT" width={64} height={64} className="h-14 w-auto object-contain" priority />
           <span className="text-base font-serif tracking-tight text-[var(--text-primary)]">
             DesignT
           </span>

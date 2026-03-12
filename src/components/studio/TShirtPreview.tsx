@@ -117,7 +117,10 @@ export function TShirtPreview({
           >
             <img
               src={
-                activeDesign.startsWith("data:")
+                activeDesign.startsWith("data:") ||
+                activeDesign.startsWith("http://") ||
+                activeDesign.startsWith("https://") ||
+                activeDesign.startsWith("/")
                   ? activeDesign
                   : `data:image/png;base64,${activeDesign}`
               }

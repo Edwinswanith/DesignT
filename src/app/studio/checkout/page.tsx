@@ -1,42 +1,41 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { StudioLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
 import { TShirtPreview, ShowBackButton } from "@/components/studio";
 import { PaymentOptions, TrustBadges } from "@/components/checkout";
-import { useDesignStore } from "@/stores/useDesignStore";
-import { useProductStore } from "@/stores/useProductStore";
 import { useCustomerStore } from "@/stores/useCustomerStore";
+import { useCartStore } from "@/stores/useCartStore";
 import { TSHIRT_COLORS } from "@/constants/colors";
 import { ALL_SIZES } from "@/constants/sizes";
 import { calculatePricing, formatPrice } from "@/constants/pricing";
+import type { OrderVariant } from "@/types";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [side, setSide] = useState<"front" | "back">("front");
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
 
-  const { mode, currentDesign, uploadedImage, backDesign } = useDesignStore();
-  const { color, size, quantity, designPosition, backDesignPosition } = useProductStore();
-  const { name, phone, address, city, pincode, state, paymentMethod } =
+  const { items: cartItems, clearCart, updateItemQuantity } = useCartStore();
+  const { name, phone, email: customerEmail, address, city, pincode, state, paymentMethod } =
     useCustomerStore();
+  const navigatingToOrderSuccess = useRef(false);
 
-  const email = session?.user?.email || "";
+  const email = session?.user?.email || customerEmail || "";
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const pricing = calculatePricing(totalQuantity, paymentMethod);
 
-  const activeDesign = mode === "ai" ? currentDesign : uploadedImage;
-  const colorData = TSHIRT_COLORS[color];
-  const sizeData = ALL_SIZES[size];
-  const pricing = calculatePricing(quantity, paymentMethod);
-
-  // Redirect if no design or customer info
-  if (!activeDesign || !name || !phone || !address) {
-    router.push("/studio");
-    return null;
-  }
+  // Redirect if no cart items or customer info (skip when we just placed order and are going to /order/[id])
+  useEffect(() => {
+    if (navigatingToOrderSuccess.current) return;
+    if (cartItems.length === 0 || !name || !phone || !address) {
+      router.push("/studio");
+    }
+  }, [cartItems.length, name, phone, address, router]);
 
   const handleBack = () => {
     router.push("/studio/details");
@@ -46,6 +45,22 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // Build variants array
+      const variants: OrderVariant[] = cartItems.map((item) => ({
+        tshirtColor: item.color,
+        tshirtSize: item.size,
+        quantity: item.quantity,
+        designUrl: item.designImage,
+        backDesignUrl: item.backDesignImage ?? undefined,
+        designPositionY: item.designPosition.y,
+        designScale: item.designPosition.scale,
+        designAspectRatio: item.aspectRatio,
+        unitPrice: pricing.unitPrice,
+      }));
+
+      // Use first variant for flat fields (backward compatibility)
+      const first = variants[0];
+
       // Prepare order data
       const orderData = {
         customerName: name,
@@ -55,14 +70,14 @@ export default function CheckoutPage() {
         city,
         pincode,
         state,
-        tshirtColor: color,
-        tshirtSize: size,
-        quantity,
-        designUrl: activeDesign,
-        ...(backDesign ? { backDesignUrl: backDesign } : {}),
-        designPositionY: designPosition.y,
-        designScale: designPosition.scale,
-        designAspectRatio: mode === "ai" ? "16x9" : "1x1",
+        tshirtColor: first.tshirtColor,
+        tshirtSize: first.tshirtSize,
+        quantity: first.quantity,
+        designUrl: first.designUrl,
+        ...(first.backDesignUrl ? { backDesignUrl: first.backDesignUrl } : {}),
+        designPositionY: first.designPositionY,
+        designScale: first.designScale,
+        designAspectRatio: first.designAspectRatio,
         unitPrice: pricing.unitPrice,
         subtotal: pricing.subtotal,
         gstAmount: pricing.gst,
@@ -73,6 +88,8 @@ export default function CheckoutPage() {
         paymentMethod,
         paymentStatus: "pending",
         status: "pending",
+        // Include variants only if multi-variant
+        ...(cartItems.length > 1 ? { variants } : {}),
       };
 
       // Call the order API
@@ -86,15 +103,21 @@ export default function CheckoutPage() {
         throw new Error("Failed to create order");
       }
 
-      const { orderId } = await response.json();
+      const data = await response.json();
+      const orderId = data?.orderId;
 
-      // Navigate to order confirmation
+      if (!orderId) {
+        throw new Error("Order created but no order ID returned");
+      }
+
+      navigatingToOrderSuccess.current = true;
+      clearCart();
       router.push(`/order/${orderId}`);
     } catch (error) {
       console.error("Order error:", error);
       setIsProcessing(false);
     }
-  }, [router, name, phone, email, address, city, pincode, state, paymentMethod, color, size, quantity, activeDesign, designPosition, mode, pricing, backDesign]);
+  }, [router, name, phone, email, address, city, pincode, state, paymentMethod, cartItems, pricing, clearCart]);
 
   return (
     <StudioLayout currentStep={4}>
@@ -105,7 +128,7 @@ export default function CheckoutPage() {
           <div className="p-6 rounded-[20px] bg-[var(--surface-raised)] border border-[var(--border-default)]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-serif text-[var(--text-primary)]">
-                Your Order
+                Your Order — {cartItems.length} item{cartItems.length > 1 ? "s" : ""}
               </h3>
               <button
                 onClick={() => router.push("/studio/customize")}
@@ -115,39 +138,87 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            <div className="flex gap-6">
-              {/* Product Image */}
-              <div className="w-32 flex-shrink-0 space-y-2">
-                <TShirtPreview
-                  color={color}
-                  designImage={activeDesign}
-                  backDesignImage={backDesign}
-                  designPosition={designPosition}
-                  backDesignPosition={backDesignPosition}
-                  size="sm"
-                  side={side}
-                />
-                <div className="flex justify-center">
-                  <ShowBackButton side={side} onToggle={setSide} />
-                </div>
-              </div>
+            <div className="space-y-4">
+              {cartItems.map((item, idx) => {
+                const colorData = TSHIRT_COLORS[item.color];
+                const sizeData = ALL_SIZES[item.size];
+                const isExpanded = expandedItemId === item.id;
 
-              {/* Product Info */}
-              <div className="flex-1 space-y-3">
-                <h4 className="font-semibold text-[var(--text-primary)]">
-                  Custom Design T-Shirt
-                </h4>
-                <div className="space-y-1 text-sm text-[var(--text-secondary)]">
-                  <p>Color: {colorData.name}</p>
-                  <p>
-                    Size: {sizeData.label} ({sizeData.chest})
-                  </p>
-                  <p>Quantity: {quantity}</p>
-                </div>
-                <p className="font-semibold text-[var(--text-primary)]">
-                  {formatPrice(pricing.unitPrice)} each
-                </p>
-              </div>
+                return (
+                  <div
+                    key={item.id}
+                    className="flex gap-4 pb-4 border-b border-[var(--border-default)] last:border-0 last:pb-0"
+                  >
+                    {/* Product Image */}
+                    <div
+                      className="w-24 flex-shrink-0 space-y-2 cursor-pointer"
+                      onClick={() =>
+                        setExpandedItemId(isExpanded ? null : item.id)
+                      }
+                    >
+                      <TShirtPreview
+                        color={item.color}
+                        designImage={item.designImage}
+                        backDesignImage={item.backDesignImage}
+                        designPosition={item.designPosition}
+                        backDesignPosition={item.backDesignPosition}
+                        size="sm"
+                        side="front"
+                      />
+                      {isExpanded && (
+                        <div className="flex justify-center">
+                          <ShowBackButton
+                            side="front"
+                            onToggle={() => {}}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="flex-1 space-y-2">
+                      <h4 className="font-semibold text-[var(--text-primary)]">
+                        Item {idx + 1} — {colorData.name} / {sizeData.label}
+                      </h4>
+                      <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+                        <p>Chest: {sizeData.chest}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          onClick={() =>
+                            updateItemQuantity(
+                              item.id,
+                              Math.max(1, item.quantity - 1)
+                            )
+                          }
+                          disabled={item.quantity <= 1}
+                          className="w-7 h-7 rounded-lg border border-[var(--border-default)] text-sm font-medium disabled:opacity-40 hover:bg-[var(--surface-raised)]"
+                        >
+                          −
+                        </button>
+                        <span className="w-6 text-center text-sm font-semibold">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateItemQuantity(
+                              item.id,
+                              Math.min(10, item.quantity + 1)
+                            )
+                          }
+                          disabled={item.quantity >= 10}
+                          className="w-7 h-7 rounded-lg border border-[var(--border-default)] text-sm font-medium disabled:opacity-40 hover:bg-[var(--surface-raised)]"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                        {formatPrice(pricing.unitPrice)} each
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -206,7 +277,7 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-[var(--text-secondary)]">
-                    Subtotal ({quantity} item{quantity > 1 ? "s" : ""})
+                    Subtotal ({totalQuantity} item{totalQuantity > 1 ? "s" : ""})
                   </span>
                   <span className="text-[var(--text-primary)]">
                     {formatPrice(pricing.subtotal)}

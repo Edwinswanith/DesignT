@@ -70,18 +70,6 @@ export function Hero() {
               Our AI creates unique designs in any style you imagine.
             </p>
 
-            {/* Feature Pills */}
-            <div className="mb-8 animate-slide-up stagger-1">
-              <p className="text-sm text-[var(--text-secondary)]">
-                {["Combine Multiple Photos", "Any Style", "16:9 / 9:16 / 1:1"].map((feature, i) => (
-                  <span key={feature}>
-                    {i > 0 && <span className="mx-3">·</span>}
-                    <span>{feature}</span>
-                  </span>
-                ))}
-              </p>
-            </div>
-
             {/* CTA Button */}
             <div className="animate-slide-up stagger-2">
               <Link
@@ -127,15 +115,15 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Right - T-Shirt Showcase - Editorial Layout */}
-          <div className="relative animate-slide-up stagger-2 flex gap-4">
-            {/* Vertical Thumbnail Navigation */}
-            <div className="flex flex-col gap-2">
+          {/* Right - T-Shirt Showcase - Main preview on top / thumbnails at bottom on mobile */}
+          <div className="relative animate-slide-up stagger-2 flex flex-col-reverse lg:flex-row gap-4">
+            {/* Thumbnails: horizontal row on mobile, vertical column on desktop */}
+            <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 shrink-0">
               {SAMPLE_DESIGNS.map((design, index) => (
                 <button
                   key={design.id}
                   onClick={() => setActiveDesign(index)}
-                  className={`w-16 h-20 rounded-lg border-2 transition-all duration-300 overflow-hidden ${
+                  className={`shrink-0 w-16 h-20 rounded-lg border-2 transition-all duration-300 overflow-hidden ${
                     activeDesign === index
                       ? "border-[var(--accent-primary)] shadow-lg"
                       : "border-[var(--border-default)] opacity-60 hover:opacity-100"
@@ -154,7 +142,7 @@ export function Hero() {
               ))}
             </div>
 
-            {/* Main Display Column */}
+            {/* Main Display */}
             <div className="flex-1 relative">
               {/* Main T-Shirt Display */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-100" style={{ transform: "rotate(1.5deg)" }}>

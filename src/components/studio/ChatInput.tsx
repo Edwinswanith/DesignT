@@ -1,8 +1,11 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { preprocessImage, needsPreprocessing } from "@/lib/imagePreprocess";
+import { StyleSelector } from "./StyleSelector";
+import type { ImageStyleId } from "@/constants/styles";
+import type { AspectRatioId } from "@/constants/prompts";
 
 interface AttachedImage {
   id: string;
@@ -15,6 +18,11 @@ interface ChatInputProps {
   onSend: (message: string, images: { data: string; mimeType: string }[]) => void;
   isDisabled?: boolean;
   placeholder?: string;
+  /** When provided, shows a settings icon that opens a dropdown for style and aspect ratio */
+  imageStyle?: ImageStyleId;
+  aspectRatio?: AspectRatioId;
+  onImageStyleChange?: (value: ImageStyleId) => void;
+  onAspectRatioChange?: (value: AspectRatioId) => void;
 }
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
@@ -26,14 +34,33 @@ export function ChatInput({
   onSend,
   isDisabled = false,
   placeholder = "Describe your design idea...",
+  imageStyle,
+  aspectRatio,
+  onImageStyleChange,
+  onAspectRatioChange,
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [attachedImages, setAttachedImages] = useState<AttachedImage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  const showSettings = imageStyle !== undefined && aspectRatio !== undefined && onImageStyleChange && onAspectRatioChange;
+
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [settingsOpen]);
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
@@ -253,6 +280,46 @@ export function ChatInput({
       )}
 
       {/* Input Area */}
+      <div ref={settingsRef} className="relative">
+        {/* Style & resolution dropdown */}
+        {showSettings && settingsOpen && (
+          <div className="absolute bottom-full left-0 mb-1 w-[min(320px,calc(100vw-2rem))] rounded-xl border border-[var(--border-default)] bg-[var(--surface-raised)] shadow-[var(--shadow-lift)] p-3 space-y-3 z-50 animate-slide-down">
+            <StyleSelector value={imageStyle!} onChange={onImageStyleChange!} size="compact" />
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
+                Aspect ratio
+              </label>
+              <div className="flex gap-1.5">
+                {(["1:1", "16:9", "9:16"] as const).map((ratio) => {
+                  const isActive = aspectRatio === ratio;
+                  return (
+                    <button
+                      key={ratio}
+                      type="button"
+                      onClick={() => onAspectRatioChange!(ratio)}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg border transition-all duration-200",
+                        isActive
+                          ? "border-[var(--border-accent)] bg-[var(--accent-primary)]/8 text-[var(--accent-primary)]"
+                          : "border-[var(--border-default)] text-[var(--text-tertiary)] hover:border-[var(--border-hover)] hover:text-[var(--text-secondary)]"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "inline-block border rounded-sm",
+                          isActive ? "border-[var(--accent-primary)]/50" : "border-current opacity-40",
+                          ratio === "1:1" ? "w-2.5 h-2.5" : ratio === "16:9" ? "w-3.5 h-2" : "w-2 h-3.5"
+                        )}
+                      />
+                      {ratio}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
       <div
         className={cn(
           "flex items-end gap-2 p-2.5 rounded-2xl border transition-all duration-300",
@@ -293,6 +360,28 @@ export function ChatInput({
           className="hidden"
         />
 
+        {/* Style & resolution trigger (inside input row) */}
+        {showSettings && (
+          <button
+            type="button"
+            onClick={() => setSettingsOpen((o) => !o)}
+            className={cn(
+              "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
+              settingsOpen
+                ? "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]"
+                : "text-[var(--text-secondary)] hover:text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/8 active:scale-95"
+            )}
+            title="Style & aspect ratio"
+            aria-expanded={settingsOpen}
+            aria-haspopup="true"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4.5 h-4.5">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          </button>
+        )}
+
         {/* Text Input */}
         <textarea
           ref={textareaRef}
@@ -330,6 +419,7 @@ export function ChatInput({
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>
         </button>
+      </div>
       </div>
 
       {/* Helper Text */}

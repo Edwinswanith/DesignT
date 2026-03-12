@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </svg>
             </button>
             <Link href="/admin" className="flex items-center gap-3 group">
-              <Image src="/logo.png" alt="DesignT" width={32} height={32} className="h-9 w-auto object-contain rounded-lg shadow-sm" priority />
+              <Image src="/logo.png" alt="DesignT" width={64} height={64} className="h-14 w-auto object-contain" priority />
               <div className="hidden sm:flex flex-col">
                 <span className="text-xs font-semibold text-[var(--text-tertiary)] tracking-widest uppercase">Admin</span>
                 <span className="text-sm font-serif font-semibold text-[var(--text-primary)]">Panel</span>

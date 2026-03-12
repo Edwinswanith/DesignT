@@ -68,27 +68,29 @@ export function HowItWorks() {
           </p>
         </div>
 
-        {/* Steps Grid - Editorial Divider Layout */}
-        <div className="divide-y md:divide-y-0 md:divide-x divide-[var(--border-default)]">
+        {/* Steps Row with Borders */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {STEPS.map((step) => (
             <div
               key={step.number}
-              className="px-0 md:px-10 py-10 md:py-0"
+              className="border border-[var(--border-default)] rounded-lg p-8 flex flex-col items-center text-center"
             >
-              {/* Step Number */}
-              <span className="text-7xl leading-none font-serif text-[var(--border-default)] mb-4 block">
+              {/* 1st: Number */}
+              <span className="text-7xl leading-none font-serif text-[var(--border-default)] mb-4">
                 {step.number}
               </span>
 
-              {/* Icon */}
-              <div className="mt-6 mb-6 text-[var(--accent-primary)]">
-                {step.icon}
+              {/* 2nd: Icon and Title */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-[var(--accent-primary)]">
+                  {step.icon}
+                </div>
+                <h3 className="text-2xl font-serif text-[var(--text-primary)]">
+                  {step.title}
+                </h3>
               </div>
 
-              {/* Content */}
-              <h3 className="text-2xl font-serif text-[var(--text-primary)] mb-3">
-                {step.title}
-              </h3>
+              {/* 3rd: Content */}
               <p className="text-[var(--text-secondary)] leading-relaxed">
                 {step.description}
               </p>

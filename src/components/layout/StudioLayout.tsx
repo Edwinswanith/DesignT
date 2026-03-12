@@ -57,7 +57,7 @@ export function StudioLayout({ children, currentStep }: StudioLayoutProps) {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-[var(--surface-default)] relative texture-noise">
+    <div className="min-h-screen bg-[var(--surface-default)] relative texture-noise overflow-x-hidden">
       {/* Studio Header */}
       <header className="sticky top-0 z-40 glass">
         <Container size="wide">
@@ -67,9 +67,9 @@ export function StudioLayout({ children, currentStep }: StudioLayoutProps) {
               <Image
                 src="/logo.png"
                 alt="DesignT"
-                width={32}
-                height={32}
-                className="h-8 w-auto object-contain rounded-lg"
+                width={64}
+                height={64}
+                className="h-14 w-auto object-contain"
                 priority
               />
               <span className="text-lg font-serif tracking-tight text-[var(--text-primary)]">

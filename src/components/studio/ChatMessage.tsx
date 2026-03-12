@@ -9,10 +9,12 @@ import { Button } from "@/components/ui";
 interface ChatMessageProps {
   message: ConversationMessage;
   onSelectDesign?: (imageData: string) => void;
+  /** When provided (e.g. on mobile), Use button calls this instead of onSelectDesign; typically selects image and opens preview drawer */
+  onUseDesign?: (imageData: string) => void;
   isSelected?: boolean;
 }
 
-export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessageProps) {
+export function ChatMessage({ message, onSelectDesign, onUseDesign, isSelected }: ChatMessageProps) {
   const isUser = message.role === "user";
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [removedBgImages, setRemovedBgImages] = useState<Record<number, string>>({});
@@ -37,10 +39,18 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
     }
   };
 
+  const handleRestoreBg = (idx: number) => {
+    setRemovedBgImages((prev) => {
+      const next = { ...prev };
+      delete next[idx];
+      return next;
+    });
+  };
+
   return (
     <div
       className={cn(
-        "flex gap-3 animate-message-enter",
+        "flex gap-3 animate-message-enter min-w-0",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
@@ -67,7 +77,7 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
       {/* Message Content */}
       <div
         className={cn(
-          "flex flex-col gap-3 max-w-[82%]",
+          "flex flex-col gap-3 max-w-[82%] min-w-0",
           isUser ? "items-end" : "items-start"
         )}
       >
@@ -76,7 +86,7 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
           <div
             key={`text-${idx}`}
             className={cn(
-              "px-4 py-3 rounded-2xl text-sm leading-relaxed transition-all duration-300",
+              "px-4 py-3 rounded-2xl text-sm leading-relaxed transition-all duration-300 break-words",
               isUser
                 ? "bg-[var(--accent-primary)] text-white rounded-tr-md shadow-sm"
                 : "bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-default)] rounded-tl-md shadow-sm"
@@ -93,15 +103,15 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
           const isLoaded = loadedImages.has(idx);
 
           return (
-            <div key={`image-${idx}`} className="relative group">
+            <div key={`image-${idx}`} className="relative group max-w-full min-w-0">
               <div
                 className={cn(
-                  "relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ease-out",
+                  "relative rounded-2xl overflow-hidden border-2 transition-all duration-300 ease-out max-w-full",
                   !isUser && "checkerboard",
                   isSelected
                     ? "border-[var(--accent-primary)] shadow-[var(--shadow-glow)] animate-glow-pulse"
                     : "border-[var(--border-default)] hover:border-[var(--accent-primary)]/40 hover:shadow-[var(--shadow-medium)]",
-                  !isLoaded && "min-h-[200px] min-w-[200px]"
+                  !isLoaded && "min-h-[120px] min-w-0 sm:min-h-[200px] sm:min-w-[200px]"
                 )}
               >
                 {/* Loading skeleton */}
@@ -113,16 +123,16 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
                   src={displayImageUrl}
                   alt={isUser ? "Uploaded image" : "Generated design"}
                   className={cn(
-                    "max-w-[380px] max-h-[380px] w-auto h-auto object-contain transition-all duration-500",
+                    "max-w-full max-h-[380px] w-auto h-auto object-contain transition-all duration-500",
                     isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
                   )}
                   style={{ backgroundColor: "transparent" }}
                   onLoad={() => handleImageLoad(idx)}
                 />
 
-                {/* Selection overlay for AI-generated images */}
+                {/* Selection overlay for AI-generated images (desktop: show on hover) */}
                 {!isUser && onSelectDesign && isLoaded && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-5 gap-2">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 hidden md:flex items-end justify-center pb-5 gap-2">
                     {!removedBgImages[idx] && (
                       <Button
                         size="sm"
@@ -141,13 +151,13 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
                       <Button
                         size="sm"
                         variant="ghost"
-                        disabled
-                        className="shadow-2xl transform translate-y-3 group-hover:translate-y-0 transition-all duration-300 !bg-[var(--accent-success)]/10 !text-[var(--accent-success)]"
+                        onClick={() => handleRestoreBg(idx)}
+                        className="shadow-2xl transform translate-y-3 group-hover:translate-y-0 transition-all duration-300"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 mr-1.5">
-                          <polyline points="20 6 9 17 4 12" />
+                          <path d="M3 9v6h6M21 15v-6h-6M21 3l-7 7M3 21l7-7" />
                         </svg>
-                        BG Removed
+                        With BG
                       </Button>
                     )}
                     <Button
@@ -177,6 +187,63 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
                   </div>
                 )}
 
+                {/* Mobile: action buttons always visible below each image */}
+                {!isUser && (onSelectDesign || onUseDesign) && isLoaded && (
+                  <div className="flex md:hidden flex-wrap gap-2 mt-2 p-2 rounded-xl bg-[var(--surface-overlay)] border border-[var(--border-default)]">
+                    {!removedBgImages[idx] && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveBg(idx, originalImageUrl)}
+                        disabled={removingBg[idx]}
+                        className="flex-1 min-w-0"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 mr-1.5 shrink-0">
+                          <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11l1 9h2l1-9m-4 0h4" />
+                        </svg>
+                        <span className="truncate">{removingBg[idx] ? "Removing..." : "Remove BG"}</span>
+                      </Button>
+                    )}
+                    {removedBgImages[idx] && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRestoreBg(idx)}
+                        className="flex-1 min-w-0"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 mr-1.5 shrink-0">
+                          <path d="M3 9v6h6M21 15v-6h-6M21 3l-7 7M3 21l7-7" />
+                        </svg>
+                        <span className="truncate">With BG</span>
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() => (onUseDesign ? onUseDesign(displayImageUrl) : onSelectDesign?.(displayImageUrl))}
+                      className={cn(
+                        "flex-1 min-w-0",
+                        isSelected && "!bg-[var(--accent-success)] !text-white hover:!bg-[var(--accent-success)]"
+                      )}
+                    >
+                      {isSelected ? (
+                        <>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 mr-1.5 shrink-0">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          <span className="truncate">Selected</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 mr-1.5 shrink-0">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                          <span className="truncate">Use This Design</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
                 {/* Selected indicator badge */}
                 {isSelected && (
                   <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-[var(--accent-primary)] flex items-center justify-center shadow-lg animate-scale-in">
@@ -189,8 +256,8 @@ export function ChatMessage({ message, onSelectDesign, isSelected }: ChatMessage
 
               {/* Helper text for AI images */}
               {!isUser && isLoaded && (
-                <p className="mt-2 text-xs text-[var(--text-tertiary)] flex items-center gap-1.5">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3 h-3">
+                <p className="mt-2 text-xs text-[var(--text-tertiary)] flex items-center gap-1.5 md:block hidden">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3 h-3 shrink-0">
                     <path d="M15 15l-2 5L9 9l11 4-5 2z" />
                   </svg>
                   {isSelected ? "Design selected — continue below" : "Hover to select this design"}
