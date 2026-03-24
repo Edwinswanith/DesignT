@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { StudioLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
 import {
@@ -22,12 +22,26 @@ type MobileTab = "color" | "size" | "position" | "summary";
 
 export default function CustomizePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editItemId = searchParams.get("editItem");
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [side, setSide] = useState<"front" | "back">("front");
   const [itemQuantity, setItemQuantity] = useState(1);
   const [mobileTab, setMobileTab] = useState<MobileTab>("color");
 
-  const { mode, currentDesign, uploadedImage, backDesign, aspectRatio, reset: resetDesign } = useDesignStore();
+  const {
+    mode,
+    currentDesign,
+    uploadedImage,
+    backDesign,
+    aspectRatio,
+    setCurrentDesign,
+    setBackDesign,
+    setUploadedImage,
+    setMode,
+    setAspectRatio,
+    reset: resetDesign,
+  } = useDesignStore();
   const {
     color,
     setColor,
@@ -40,15 +54,47 @@ export default function CustomizePage() {
     resetPosition,
     reset: resetProduct,
   } = useProductStore();
-  const { addItem, items: cartItems } = useCartStore();
+  const { addItem, updateItem, items: cartItems } = useCartStore();
+  const editingItem = editItemId ? cartItems.find((item) => item.id === editItemId) : undefined;
 
   const activeDesign = mode === "ai" ? currentDesign : uploadedImage;
+  const hasFrontDesign = !!activeDesign;
+  const hasBackDesign = !!backDesign;
 
   useEffect(() => {
+    if (editingItem) return;
     if (!activeDesign) {
       router.push("/studio");
     }
-  }, [activeDesign, router]);
+  }, [activeDesign, editingItem, router]);
+
+  useEffect(() => {
+    if (!editingItem) return;
+
+    setMode(editingItem.mode);
+    setAspectRatio(editingItem.aspectRatio);
+    setCurrentDesign(editingItem.mode === "ai" ? editingItem.designImage : null);
+    setUploadedImage(editingItem.mode === "upload" ? editingItem.designImage : null);
+    setBackDesign(editingItem.backDesignImage ?? null);
+
+    setColor(editingItem.color);
+    setSize(editingItem.size);
+    setDesignPosition(editingItem.designPosition);
+    setBackDesignPosition(editingItem.backDesignPosition);
+    setItemQuantity(editingItem.quantity);
+    setSide("front");
+  }, [
+    editingItem,
+    setMode,
+    setAspectRatio,
+    setCurrentDesign,
+    setUploadedImage,
+    setBackDesign,
+    setColor,
+    setSize,
+    setDesignPosition,
+    setBackDesignPosition,
+  ]);
 
   const buildCartItem = (designImage: string): CartItem => ({
     id: crypto.randomUUID(),
@@ -67,7 +113,11 @@ export default function CustomizePage() {
 
   const handleContinueToOrder = () => {
     if (!activeDesign) return;
-    addItem(buildCartItem(activeDesign));
+    if (editingItem) {
+      updateItem(editingItem.id, buildCartItem(activeDesign));
+    } else {
+      addItem(buildCartItem(activeDesign));
+    }
     router.push("/studio/details");
   };
 
@@ -79,11 +129,25 @@ export default function CustomizePage() {
     router.push("/studio");
   };
 
+  const handleRemoveCurrentSideDesign = () => {
+    if (side === "back") {
+      setBackDesign(null);
+      setSide("front");
+      return;
+    }
+
+    if (mode === "ai") {
+      setCurrentDesign(null);
+    } else {
+      setUploadedImage(null);
+    }
+  };
+
   return (
     <StudioLayout currentStep={2}>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px_220px] gap-5 lg:gap-6">
-        {/* Left Panel - Desktop only; customization options stacked */}
-        <div className="hidden lg:block space-y-5 order-2 lg:order-1">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-5 md:gap-6">
+        {/* Left Panel - Tablet/Desktop; customization options stacked */}
+        <div className="hidden md:block space-y-5 order-1">
           <div className="p-5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-default)] relative">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.06)] to-transparent" />
             <ColorSelector value={color} onChange={setColor} />
@@ -110,8 +174,8 @@ export default function CustomizePage() {
           </div>
         </div>
 
-        {/* Center Panel - Preview (order-1 lg:order-2) */}
-        <div className="order-1 lg:order-2">
+        {/* Right Panel - Tablet/Desktop (Preview top, Summary bottom) */}
+        <div className="hidden md:flex md:flex-col gap-5 order-2">
           <div className="bg-[var(--surface-raised)] rounded-2xl p-6 border border-[var(--border-default)] relative overflow-hidden">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
             <div className="flex items-center justify-between mb-4">
@@ -129,11 +193,130 @@ export default function CustomizePage() {
               size="lg"
               side={side}
             />
+            {((side === "front" && hasFrontDesign) || (side === "back" && hasBackDesign)) && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveCurrentSideDesign}
+                  className="text-[var(--accent-error)] hover:text-[var(--accent-error)]"
+                >
+                  Remove {side === "front" ? "Front" : "Back"} Design
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="bg-[var(--surface-raised)] rounded-2xl p-5 border border-[var(--border-default)] relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Summary</h3>
+            <div className="space-y-3 pb-4 border-b border-[var(--border-default)]">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Color</span>
+                <p className="font-semibold text-[var(--text-primary)] capitalize mt-0.5 text-sm">
+                  {color.replace("-", " ")}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Size</span>
+                <p className="font-semibold text-[var(--text-primary)] mt-0.5 text-sm">
+                  {size}
+                </p>
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="pt-4 pb-4 border-b border-[var(--border-default)]">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--text-secondary)]">Quantity</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setItemQuantity((q) => Math.max(PRICING.MIN_QUANTITY, q - 1))}
+                    disabled={itemQuantity <= PRICING.MIN_QUANTITY}
+                    className="w-8 h-8 rounded-lg border border-[var(--border-default)] text-sm font-medium disabled:opacity-40 hover:bg-[var(--surface-inset)] transition-colors"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold text-[var(--text-primary)]">
+                    {itemQuantity}
+                  </span>
+                  <button
+                    onClick={() => setItemQuantity((q) => Math.min(PRICING.MAX_QUANTITY, q + 1))}
+                    disabled={itemQuantity >= PRICING.MAX_QUANTITY}
+                    className="w-8 h-8 rounded-lg border border-[var(--border-default)] text-sm font-medium disabled:opacity-40 hover:bg-[var(--surface-inset)] transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Cart Badge */}
+            {cartItems.length > 0 && (
+              <div className="pt-4 pb-4 border-b border-[var(--border-default)]">
+                <div className="text-xs font-medium text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 rounded-lg px-3 py-1.5 text-center">
+                  Cart: {cartItems.length} item{cartItems.length > 1 ? "s" : ""} saved
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className={`${cartItems.length > 0 ? "pt-4" : "pt-4"} space-y-2`}>
+              <Button variant="outline" size="md" onClick={handleBack} className="w-full whitespace-nowrap">
+                <svg className="mr-2 w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+                Back
+              </Button>
+              <Button size="md" onClick={handleContinueToOrder} className="w-full whitespace-nowrap">
+                Continue to Order
+                <svg className="ml-2 w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </Button>
+              <Button variant="outline" size="md" onClick={handleAddAnother} className="w-full whitespace-nowrap">
+                + Add Another T-shirt
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Mobile: tabbed editing + bottom actions */}
-        <div className="lg:hidden order-2 space-y-4">
+        {/* Mobile: preview + tabbed editing + bottom actions */}
+        <div className="md:hidden order-1">
+          <div className="bg-[var(--surface-raised)] rounded-2xl p-6 border border-[var(--border-default)] relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
+                Preview
+              </h3>
+              <ShowBackButton side={side} onToggle={setSide} />
+            </div>
+            <TShirtPreview
+              color={color}
+              designImage={activeDesign}
+              backDesignImage={backDesign}
+              designPosition={designPosition}
+              backDesignPosition={backDesignPosition}
+              size="lg"
+              side={side}
+            />
+            {((side === "front" && hasFrontDesign) || (side === "back" && hasBackDesign)) && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveCurrentSideDesign}
+                  className="text-[var(--accent-error)] hover:text-[var(--accent-error)]"
+                >
+                  Remove {side === "front" ? "Front" : "Back"} Design
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="md:hidden order-2 space-y-4">
           <div className="rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-default)] overflow-hidden">
             <div className="flex border-b border-[var(--border-default)]">
               {(["color", "size", "position", "summary"] as const).map((tab) => (
@@ -240,84 +423,6 @@ export default function CustomizePage() {
             <Button variant="outline" size="md" onClick={handleAddAnother} className="w-full">
               + Add Another T-shirt
             </Button>
-          </div>
-        </div>
-
-        {/* Right Panel - Summary & Actions (desktop only) */}
-        <div className="hidden lg:block order-3">
-          <div className="bg-[var(--surface-raised)] rounded-2xl p-5 border border-[var(--border-default)] relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border-default)] to-transparent" />
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Summary</h3>
-            <div className="space-y-3 pb-4 border-b border-[var(--border-default)]">
-              <div>
-                <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Color</span>
-                <p className="font-semibold text-[var(--text-primary)] capitalize mt-0.5 text-sm">
-                  {color.replace("-", " ")}
-                </p>
-              </div>
-              <div>
-                <span className="text-xs uppercase tracking-widest text-[var(--text-tertiary)]">Size</span>
-                <p className="font-semibold text-[var(--text-primary)] mt-0.5 text-sm">
-                  {size}
-                </p>
-              </div>
-            </div>
-
-            {/* Quantity Selector */}
-            <div className="pt-4 pb-4 border-b border-[var(--border-default)]">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-[var(--text-secondary)]">Quantity</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setItemQuantity((q) => Math.max(PRICING.MIN_QUANTITY, q - 1))}
-                    disabled={itemQuantity <= PRICING.MIN_QUANTITY}
-                    className="w-8 h-8 rounded-lg border border-[var(--border-default)] text-sm font-medium disabled:opacity-40 hover:bg-[var(--surface-inset)] transition-colors"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center text-sm font-semibold text-[var(--text-primary)]">
-                    {itemQuantity}
-                  </span>
-                  <button
-                    onClick={() => setItemQuantity((q) => Math.min(PRICING.MAX_QUANTITY, q + 1))}
-                    disabled={itemQuantity >= PRICING.MAX_QUANTITY}
-                    className="w-8 h-8 rounded-lg border border-[var(--border-default)] text-sm font-medium disabled:opacity-40 hover:bg-[var(--surface-inset)] transition-colors"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Cart Badge */}
-            {cartItems.length > 0 && (
-              <div className="pt-4 pb-4 border-b border-[var(--border-default)]">
-                <div className="text-xs font-medium text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 rounded-lg px-3 py-1.5 text-center">
-                  Cart: {cartItems.length} item{cartItems.length > 1 ? "s" : ""} saved
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className={`${cartItems.length > 0 ? "pt-4" : "pt-4"} space-y-2`}>
-              <Button variant="outline" size="md" onClick={handleBack} className="w-full">
-                <svg className="mr-2 w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="19" y1="12" x2="5" y2="12" />
-                  <polyline points="12 19 5 12 12 5" />
-                </svg>
-                Back
-              </Button>
-              <Button size="md" onClick={handleContinueToOrder} className="w-full">
-                Continue to Order
-                <svg className="ml-2 w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </Button>
-              <Button variant="outline" size="md" onClick={handleAddAnother} className="w-full">
-                + Add Another T-shirt
-              </Button>
-            </div>
           </div>
         </div>
       </div>

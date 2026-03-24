@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Container, Header, Footer } from "@/components/layout";
+import { Container, Header } from "@/components/layout";
 import { Button } from "@/components/ui";
 
 export default function OrderConfirmationPage() {
@@ -110,7 +110,6 @@ export default function OrderConfirmationPage() {
           </div>
         </Container>
       </main>
-      <Footer />
     </div>
   );
 }

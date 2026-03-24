@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StudioLayout } from "@/components/layout";
 import { Button } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import {
   TShirtPreview,
   ChatMessage,
@@ -52,6 +53,9 @@ export default function StudioPage() {
   const [loadingMessage, setLoadingMessage] = useState("Creating your design...");
   const [side, setSide] = useState<"front" | "back">("front");
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  const [pendingDesign, setPendingDesign] = useState<string | null>(null);
+  const [remainingImagesToday, setRemainingImagesToday] = useState(10);
+  const [dailyLimit] = useState(10);
 
   const {
     messages,
@@ -72,7 +76,7 @@ export default function StudioPage() {
   } = useConversationStore();
 
   const { color, setColor, designPosition } = useProductStore();
-  const { setCurrentDesign, setMode, backDesign, setBackDesign } = useDesignStore();
+  const { setCurrentDesign, setMode, setUploadedImage, backDesign, setBackDesign } = useDesignStore();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -98,10 +102,55 @@ export default function StudioPage() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [mobilePreviewOpen]);
 
+  // Fetch image usage on load (sync with MongoDB)
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchUsage() {
+      try {
+        const res = await fetch("/api/image-usage");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (typeof data.remainingImagesToday === "number") {
+          setRemainingImagesToday(data.remainingImagesToday);
+        }
+      } catch {
+        // keep default 10 on error
+      }
+    }
+    fetchUsage();
+    return () => { cancelled = true; };
+  }, []);
+
   // Handle sending a message
   const handleSendMessage = useCallback(
     async (text: string, images: { data: string; mimeType: string }[]) => {
-      addUserMessage(text, images);
+      const trimmedText = text.trim();
+      const isDirectUpload = !trimmedText && images.length > 0;
+
+      // Direct upload mode should not consume daily AI generation credits.
+      if (isDirectUpload) {
+        const uploadedImage = images[0].data;
+        addUserMessage("", images);
+        setError(null);
+
+        if (side === "back") {
+          setBackDesign(uploadedImage);
+        } else {
+          setSelectedDesign(uploadedImage);
+          setCurrentDesign(uploadedImage);
+        }
+
+        setUploadedImage(uploadedImage);
+        setMode("upload");
+        return;
+      }
+
+      if (remainingImagesToday <= 0) {
+        setError("Daily image generation limit reached. Please try again tomorrow.");
+        return;
+      }
+
+      addUserMessage(trimmedText, images);
       setGenerating(true);
       setError(null);
 
@@ -135,6 +184,9 @@ export default function StudioPage() {
         const data = await response.json();
 
         if (!data.success) {
+          if (response.status === 403) {
+            setRemainingImagesToday(0);
+          }
           throw new Error(data.error || "Failed to generate design");
         }
 
@@ -153,6 +205,15 @@ export default function StudioPage() {
         }
 
         addModelMessage(modelParts);
+
+        // Refetch usage so counter stays in sync with backend
+        const usageRes = await fetch("/api/image-usage");
+        if (usageRes.ok) {
+          const usageData = await usageRes.json();
+          if (typeof usageData.remainingImagesToday === "number") {
+            setRemainingImagesToday(usageData.remainingImagesToday);
+          }
+        }
       } catch (err) {
         console.error("Generation error:", err);
         setError(
@@ -165,7 +226,7 @@ export default function StudioPage() {
         setGenerating(false);
       }
     },
-    [addUserMessage, addModelMessage, setGenerating, setError, getGeminiHistory, aspectRatio, imageStyle]
+    [addUserMessage, addModelMessage, setGenerating, setError, getGeminiHistory, aspectRatio, imageStyle, remainingImagesToday, side, setBackDesign, setSelectedDesign, setCurrentDesign, setMode, setUploadedImage]
   );
 
   const handleSelectDesign = useCallback(
@@ -186,6 +247,23 @@ export default function StudioPage() {
       router.push("/studio/customize");
     }
   }, [selectedDesign, router]);
+
+  const handleApplyPendingDesign = useCallback(
+    (targetSide: "front" | "back") => {
+      if (!pendingDesign) return;
+
+      if (targetSide === "back") {
+        setBackDesign(pendingDesign);
+      } else {
+        setSelectedDesign(pendingDesign);
+        setCurrentDesign(pendingDesign);
+        setMode("ai");
+      }
+
+      setPendingDesign(null);
+    },
+    [pendingDesign, setBackDesign, setSelectedDesign, setCurrentDesign, setMode]
+  );
 
   const handleNewConversation = useCallback(() => {
     clearConversation();
@@ -230,6 +308,17 @@ export default function StudioPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "text-xs font-medium px-2.5 py-1.5 rounded-lg border",
+                  remainingImagesToday <= 0
+                    ? "bg-[var(--accent-error)]/10 border-[var(--accent-error)]/30 text-[var(--accent-error)]"
+                    : "bg-[var(--accent-primary)]/5 border-[var(--border-default)] text-[var(--text-secondary)]"
+                )}
+                title="Images you can generate today"
+              >
+                {remainingImagesToday} / {dailyLimit} left today
+              </span>
               {hasMessages && (
                 <button
                   onClick={handleNewConversation}
@@ -295,7 +384,14 @@ export default function StudioPage() {
                 key={message.id}
                 message={message}
                 onSelectDesign={message.role === "model" ? handleSelectDesign : undefined}
-                onUseDesign={message.role === "model" ? (imageData) => { handleSelectDesign(imageData); setMobilePreviewOpen(true); } : undefined}
+                onUseDesign={
+                  message.role === "model"
+                    ? (imageData) => {
+                        setPendingDesign(imageData);
+                        setMobilePreviewOpen(true);
+                      }
+                    : undefined
+                }
                 isSelected={
                   message.role === "model" &&
                   message.parts.some(
@@ -353,7 +449,7 @@ export default function StudioPage() {
           <div className="p-3.5 border-t border-[var(--border-default)]">
             <ChatInput
               onSend={handleSendMessage}
-              isDisabled={isGenerating}
+              isDisabled={isGenerating || remainingImagesToday <= 0}
               placeholder={
                 hasMessages
                   ? "Ask for changes or describe a new design..."
@@ -466,7 +562,10 @@ export default function StudioPage() {
               <h3 className="text-sm font-semibold text-[var(--text-primary)]">Preview</h3>
               <button
                 type="button"
-                onClick={() => setMobilePreviewOpen(false)}
+                onClick={() => {
+                  setMobilePreviewOpen(false);
+                  setPendingDesign(null);
+                }}
                 className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-inset)] transition-colors"
                 aria-label="Close preview"
               >
@@ -526,19 +625,37 @@ export default function StudioPage() {
 
               <Button
                 size="lg"
-                disabled={!selectedDesign}
+                disabled={!selectedDesign && !pendingDesign}
                 onClick={() => {
-                  setMobilePreviewOpen(false);
-                  handleContinue();
+                  if (pendingDesign) {
+                    handleApplyPendingDesign(side);
+                  } else {
+                    setMobilePreviewOpen(false);
+                    handleContinue();
+                  }
                 }}
                 className="w-full"
               >
-                Continue to Customize
+                {pendingDesign ? `Apply to ${side === "front" ? "Front" : "Back"}` : "Continue to Customize"}
                 <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
               </Button>
+
+              {pendingDesign && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => {
+                    setPendingDesign(null);
+                    setMobilePreviewOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Cancel Selection
+                </Button>
+              )}
 
               {!selectedDesign && hasMessages && (
                 <p className="text-xs text-[var(--text-tertiary)] text-center flex items-center justify-center gap-1.5">

@@ -20,7 +20,7 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
 
-  const { items: cartItems, clearCart, updateItemQuantity } = useCartStore();
+  const { items: cartItems, clearCart, updateItemQuantity, removeItem } = useCartStore();
   const { name, phone, email: customerEmail, address, city, pincode, state, paymentMethod } =
     useCustomerStore();
   const navigatingToOrderSuccess = useRef(false);
@@ -131,7 +131,13 @@ export default function CheckoutPage() {
                 Your Order — {cartItems.length} item{cartItems.length > 1 ? "s" : ""}
               </h3>
               <button
-                onClick={() => router.push("/studio/customize")}
+                onClick={() =>
+                  router.push(
+                    cartItems[0]?.id
+                      ? `/studio/customize?editItem=${encodeURIComponent(cartItems[0].id)}`
+                      : "/studio/customize"
+                  )
+                }
                 className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline underline-offset-4"
               >
                 Edit
@@ -215,6 +221,22 @@ export default function CheckoutPage() {
                       <p className="text-xs text-[var(--text-tertiary)] mt-1">
                         {formatPrice(pricing.unitPrice)} each
                       </p>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() =>
+                            router.push(`/studio/customize?editItem=${encodeURIComponent(item.id)}`)
+                          }
+                          className="text-xs font-medium text-[var(--text-secondary)] hover:underline underline-offset-2"
+                        >
+                          Customize
+                        </button>
+                        <button
+                          onClick={() => removeItem(item.id)}
+                          className="text-xs font-medium text-[var(--accent-error)] hover:underline underline-offset-2"
+                        >
+                          Remove item
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -267,7 +289,7 @@ export default function CheckoutPage() {
 
         {/* Right Panel - Price Summary */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 space-y-6">
+          <div className="sticky top-0 space-y-6">
             {/* Price Breakdown */}
             <div className="p-6 rounded-[20px] bg-[var(--surface-raised)] border border-[var(--border-default)]">
               <h3 className="text-lg font-serif text-[var(--text-primary)] mb-6">

@@ -17,6 +17,7 @@ export interface DesignState {
 
 // Product Types
 export interface DesignPosition {
+  x?: number;
   y: number;
   scale: number;
   rotation?: number;

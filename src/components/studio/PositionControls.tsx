@@ -3,8 +3,8 @@
 import { Slider, Button } from "@/components/ui";
 
 interface PositionControlsProps {
-  position: { y: number; scale: number; rotation: number };
-  onChange: (position: Partial<{ y: number; scale: number; rotation: number }>) => void;
+  position: { x: number; y: number; scale: number; rotation: number };
+  onChange: (position: Partial<{ x: number; y: number; scale: number; rotation: number }>) => void;
   onReset: () => void;
 }
 
@@ -23,6 +23,17 @@ export function PositionControls({
           Reset
         </Button>
       </div>
+
+      {/* Horizontal Position */}
+      <Slider
+        label="Horizontal Position"
+        value={position.x}
+        onChange={(e) => onChange({ x: Number(e.target.value) })}
+        min={20}
+        max={80}
+        step={1}
+        formatValue={(v) => `${v}%`}
+      />
 
       {/* Vertical Position */}
       <Slider

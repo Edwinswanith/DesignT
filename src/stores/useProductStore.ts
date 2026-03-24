@@ -7,6 +7,7 @@ import { SizeId } from "@/constants/sizes";
 import { PRICING } from "@/constants/pricing";
 
 interface DesignPosition {
+  x: number;
   y: number;
   scale: number;
   rotation: number;
@@ -34,6 +35,7 @@ interface ProductActions {
 }
 
 const DEFAULT_POSITION: DesignPosition = {
+  x: 50,
   y: 35,
   scale: 1,
   rotation: 0,
@@ -81,6 +83,9 @@ export const useProductStore = create<ProductState & ProductActions>()(
 
       setDesignPosition: (position) => {
         const current = get().designPosition;
+        const newX = position.x !== undefined
+          ? Math.max(20, Math.min(80, position.x))
+          : (typeof current.x === "number" ? current.x : 50);
         const newY = position.y !== undefined
           ? Math.max(20, Math.min(70, position.y))
           : current.y;
@@ -92,6 +97,7 @@ export const useProductStore = create<ProductState & ProductActions>()(
           : current.rotation;
         set({
           designPosition: {
+            x: newX,
             y: newY,
             scale: newScale,
             rotation: newRotation,
@@ -101,6 +107,9 @@ export const useProductStore = create<ProductState & ProductActions>()(
 
       setBackDesignPosition: (position) => {
         const current = get().backDesignPosition;
+        const newX = position.x !== undefined
+          ? Math.max(20, Math.min(80, position.x))
+          : (typeof current.x === "number" ? current.x : 50);
         const newY = position.y !== undefined
           ? Math.max(20, Math.min(70, position.y))
           : current.y;
@@ -112,6 +121,7 @@ export const useProductStore = create<ProductState & ProductActions>()(
           : current.rotation;
         set({
           backDesignPosition: {
+            x: newX,
             y: newY,
             scale: newScale,
             rotation: newRotation,

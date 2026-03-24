@@ -29,7 +29,11 @@ export default function DetailsPage() {
   }, [cartItems.length, router]);
 
   const handleBack = () => {
-    router.push("/studio/customize");
+    router.push(
+      cartItems[0]?.id
+        ? `/studio/customize?editItem=${encodeURIComponent(cartItems[0].id)}`
+        : "/studio/customize"
+    );
   };
 
   const handleContinue = () => {
@@ -91,7 +95,7 @@ export default function DetailsPage() {
 
         {/* Right Panel - Order Summary */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 space-y-6">
+          <div className="sticky top-0 space-y-6">
             <OrderSummary />
 
             {/* Navigation - Desktop */}

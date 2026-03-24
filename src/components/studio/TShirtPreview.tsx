@@ -9,8 +9,8 @@ interface TShirtPreviewProps {
   color: TShirtColorId;
   designImage: string | null;
   backDesignImage?: string | null;
-  designPosition?: { y: number; scale: number; rotation?: number };
-  backDesignPosition?: { y: number; scale: number; rotation?: number };
+  designPosition?: { x?: number; y: number; scale: number; rotation?: number };
+  backDesignPosition?: { x?: number; y: number; scale: number; rotation?: number };
   size?: "sm" | "md" | "lg";
   side?: "front" | "back";
   className?: string;
@@ -38,8 +38,8 @@ export function TShirtPreview({
   color,
   designImage,
   backDesignImage = null,
-  designPosition = { y: 35, scale: 1, rotation: 0 },
-  backDesignPosition = { y: 35, scale: 1, rotation: 0 },
+  designPosition = { x: 50, y: 35, scale: 1, rotation: 0 },
+  backDesignPosition = { x: 50, y: 35, scale: 1, rotation: 0 },
   size = "md",
   side = "front",
   className,
@@ -60,6 +60,7 @@ export function TShirtPreview({
   // Calculate design dimensions based on scale
   const designWidth = 42 * currentPosition.scale;
   const designTop = currentPosition.y + 5;
+  const designLeft = typeof currentPosition.x === "number" ? currentPosition.x : 50;
 
   // Determine active design based on side
   const activeDesign = side === "back" ? backDesignImage : designImage;
@@ -107,7 +108,7 @@ export function TShirtPreview({
           <div
             className="absolute pointer-events-none transition-all duration-300 ease-out overflow-hidden"
             style={{
-              left: "50%",
+              left: `${designLeft}%`,
               top: `${designTop}%`,
               width: `${designWidth}%`,
               clipPath: `url(#${clipId})`,

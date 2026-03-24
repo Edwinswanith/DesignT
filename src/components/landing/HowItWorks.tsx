@@ -8,6 +8,13 @@ const STEPS = [
     title: "Create",
     description:
       "Describe your vision or upload a photo. Our AI brings your ideas to life with stunning clarity.",
+    limitNote: "You can generate up to 10 images per day; the limit resets every day.",
+    instructions: [
+      "Go to Design Studio and type what you want (e.g. a logo, pattern, or phrase).",
+      "Or upload a reference image; AI will generate designs based on it.",
+      "Use the style and aspect ratio options in the prompt bar to refine the look.",
+      "Pick a design you like, remove the background if needed, then tap Use to preview on the t-shirt.",
+    ],
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
         <path d="M12 19l7-7 3 3-7 7-3-3z" />
@@ -22,6 +29,12 @@ const STEPS = [
     title: "Customize",
     description:
       "Pick your perfect color, size, and placement. See it on the t-shirt before you buy.",
+    instructions: [
+      "Choose your t-shirt color from the palette (e.g. Midnight Black, Pure White).",
+      "Select size: Adult (S–XXL) or Kids (S/M/L); check the size guide for measurements.",
+      "Adjust design position: move it up or down, resize, or rotate using the sliders.",
+      "Toggle front or back view to see how it looks on both sides before ordering.",
+    ],
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
         <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" />
@@ -37,6 +50,12 @@ const STEPS = [
     title: "Receive",
     description:
       "We print with care using DTF technology on premium fabric. Delivered to your door in 5-7 days.",
+    instructions: [
+      "Review your order and enter delivery details (name, phone, address).",
+      "Choose payment: prepaid (card/UPI) for a discount, or cash on delivery.",
+      "Place order; you get an order confirmation and tracking once it ships.",
+      "We print with DTF on premium bamboo-cotton. Expect delivery in 5–7 business days.",
+    ],
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
         <rect x="1" y="3" width="15" height="13" rx="2" />
@@ -66,6 +85,9 @@ export function HowItWorks() {
           <p className="text-lg text-[var(--text-secondary)] max-w-2xl">
             From idea to delivery in just a few clicks
           </p>
+          <p className="mt-2 text-sm text-[var(--text-tertiary)] max-w-2xl">
+            Each user can generate up to 10 images per day. The limit resets automatically every day.
+          </p>
         </div>
 
         {/* Steps Row with Borders */}
@@ -90,10 +112,29 @@ export function HowItWorks() {
                 </h3>
               </div>
 
-              {/* 3rd: Content */}
-              <p className="text-[var(--text-secondary)] leading-relaxed">
+              {/* 3rd: Short description */}
+              <p className="text-[var(--text-secondary)] leading-relaxed mb-6">
                 {step.description}
               </p>
+
+              {/* Optional: daily limit note (Create step) */}
+              {"limitNote" in step && step.limitNote && (
+                <p className="text-xs text-[var(--text-tertiary)] mb-4 px-2 py-1.5 rounded-lg bg-[var(--surface-overlay)] border border-[var(--border-default)] w-full text-center">
+                  {step.limitNote}
+                </p>
+              )}
+
+              {/* 4th: Step-by-step instructions */}
+              <ul className="text-left w-full space-y-3 text-sm text-[var(--text-secondary)]">
+                {step.instructions.map((instruction, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--accent-primary)]/10 text-[var(--accent-primary)] text-xs font-semibold flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                    <span className="leading-relaxed">{instruction}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>

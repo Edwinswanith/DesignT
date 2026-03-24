@@ -11,8 +11,16 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // Get all orders sorted by createdAt desc
-    const orders = await Order.find().sort({ createdAt: -1 }).lean();
+    const { searchParams } = new URL(request.url);
+    const limit = Math.min(Math.max(parseInt(searchParams.get("limit") ?? "500", 10), 1), 1000);
+
+    await Order.collection.createIndex({ createdAt: -1 }, { background: true }).catch(() => {});
+
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .allowDiskUse(true)
+      .lean();
 
     return NextResponse.json({ success: true, orders });
   } catch (error) {

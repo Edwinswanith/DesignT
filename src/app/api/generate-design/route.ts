@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { connectDB } from "@/lib/mongodb";
+import { getOrCreateImageUsage, recordImageGenerated } from "@/models/ImageUsage";
 
 // Gemini API configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -44,6 +47,14 @@ Maintain the likeness and identity of each person/subject accurately.`;
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body: RequestBody = await request.json();
     const aspectRatio = body.aspectRatio || "1:1";
     const style = body.style || "";
@@ -131,6 +142,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    await connectDB();
+    const userId = session.user.email.toLowerCase();
+    const usage = await getOrCreateImageUsage(userId);
+    if (usage.remainingImagesToday <= 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Daily image generation limit reached. Please try again tomorrow.",
+        },
+        { status: 403 }
+      );
+    }
+
     console.log(`[Gemini] Model: ${IMAGE_MODEL}, Aspect: ${aspectRatio}, Style: ${style || 'none'}`);
 
     // Call Gemini API with proper configuration per documentation
@@ -212,6 +236,8 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Gemini] Success! Image MIME: ${imagePart.inlineData.mimeType}`);
+
+    await recordImageGenerated(userId);
 
     return NextResponse.json({
       success: true,
